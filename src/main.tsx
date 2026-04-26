@@ -2,6 +2,7 @@ import { StrictMode, useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { AuthProvider, useAuth } from './lib/AuthContext.tsx'
+import { PlanProvider } from './lib/PlanContext.tsx'
 import App from './App.tsx'
 import LandingPage from './pages/LandingPage.tsx'
 import PluginDownloads from './pages/PluginDownloads.tsx'
@@ -82,7 +83,9 @@ function Router() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <Router />
+      <PlanProvider>
+        <Router />
+      </PlanProvider>
     </AuthProvider>
   </StrictMode>,
 )
