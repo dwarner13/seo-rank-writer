@@ -319,6 +319,11 @@
 .usage-warn { color: #ca8a04; font-weight: 600; }
 .usage-limit { color: #dc2626; font-weight: 600; }
 .usage-limit a { color: #6366f1; text-decoration: underline; }
+.usage-upgrade-btn {
+  background: none; border: none; color: #6366f1; font-weight: 700;
+  text-decoration: underline; cursor: pointer; font-size: inherit; font-family: inherit; padding: 0;
+}
+.usage-upgrade-btn:disabled { opacity: 0.5; }
 
 /* ── Override old layout to fit inside new content area ── */
 .app--v2 .layout {
@@ -623,6 +628,9 @@
   padding: 3px 12px; border-radius: 12px;
   font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
   background: #f1f5f9; color: #475569;
+}
+.acct-plan-badge--pro {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
 }
 .acct-billing-placeholder, .acct-security-placeholder {
   padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0;

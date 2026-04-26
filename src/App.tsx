@@ -15,6 +15,7 @@ import type { ImagePromptSet } from "./services/media";
 import { useAuth } from "./lib/AuthContext";
 import { getProjects, createProject, updateProject, saveArticle, getArticles, incrementUsage } from "./lib/database";
 import { usePlan } from "./lib/PlanContext";
+import { createCheckoutSession, createPortalSession } from "./lib/stripe";
 import "./App.css";
 
 const STORAGE_KEY = "seo-content-factory-state";
@@ -127,6 +128,40 @@ function generateGbpContent(opts: { businessName: string; mainKeyword: string; l
 function App() {
   const { user, signOut, enabled: authEnabled } = useAuth();
   const { canUse, remainingGenerations, generationsUsed, generationLimit, plan, refreshPlan } = usePlan();
+  const [upgrading, setUpgrading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const url = await createCheckoutSession();
+      if (url) window.location.href = url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start checkout.");
+    } finally { setUpgrading(false); }
+  };
+
+  const handleManageBilling = async () => {
+    try {
+      const url = await createPortalSession();
+      if (url) window.location.href = url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to open billing.");
+    }
+  };
+
+  // Detect checkout success/cancel from URL params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      setSaveStatus("Upgrade successful! Welcome to Pro.");
+      refreshPlan();
+      window.history.replaceState({}, "", "/app");
+    } else if (params.get("checkout") === "cancelled") {
+      window.history.replaceState({}, "", "/app");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const saved = loadSaved();
   const restoredFromSave = !!saved;
 
@@ -1644,7 +1679,7 @@ function App() {
                   <div className="acct-profile-info">
                     <div className="acct-name">{user?.user_metadata?.full_name || settings.fullName || "Set your name below"}</div>
                     <div className="acct-email">{user?.email || settings.accountEmail || "No email set"}</div>
-                    <span className="acct-plan-badge">Free</span>
+                    <span className={`acct-plan-badge${plan !== "free" ? " acct-plan-badge--pro" : ""}`}>{plan === "free" ? "Free" : plan === "pro" ? "Pro" : "Agency"}</span>
                   </div>
                 </div>
 
@@ -1671,12 +1706,28 @@ function App() {
 
                 <h2 className="settings-section-title">Plan &amp; Billing</h2>
                 <div className="settings-plan-card">
-                  <div className="settings-plan-name">Free Plan</div>
-                  <div className="settings-plan-desc">Upgrade to Pro for unlimited pages, WordPress publishing, media engine, and more.</div>
-                  <a href="/plugins" className="inline-btn" style={{ textDecoration: "none", display: "inline-block", marginTop: 8 }}>Upgrade to Pro</a>
+                  <div className="settings-plan-name">{plan === "pro" ? "Pro Plan" : plan === "agency" ? "Agency Plan" : "Free Plan"}</div>
+                  <div className="settings-plan-desc">
+                    {plan === "free"
+                      ? "Upgrade to Pro for unlimited pages, WordPress publishing, media engine, and more."
+                      : `You're on the ${plan} plan. ${generationsUsed} / ${generationLimit} articles used this month.`}
+                  </div>
+                  {plan === "free" ? (
+                    <button className="inline-btn" style={{ marginTop: 8 }} onClick={handleUpgrade} disabled={upgrading}>
+                      {upgrading ? "Loading..." : "Upgrade to Pro — $29/mo"}
+                    </button>
+                  ) : (
+                    <button className="inline-btn" style={{ marginTop: 8 }} onClick={handleManageBilling}>
+                      Manage Billing
+                    </button>
+                  )}
                 </div>
                 <div className="acct-billing-placeholder">
-                  <p>Billing management will be available here once you upgrade to a paid plan.</p>
+                  {plan !== "free" ? (
+                    <p>Click "Manage Billing" above to update payment method, view invoices, or cancel.</p>
+                  ) : (
+                    <p>Billing management will be available here once you upgrade to a paid plan.</p>
+                  )}
                 </div>
 
                 <h2 className="settings-section-title">Security</h2>
@@ -1897,7 +1948,7 @@ function App() {
               <div className="usage-indicator">
                 <span className="usage-text">{generationsUsed} / {generationLimit} articles this month</span>
                 {remainingGenerations <= 1 && remainingGenerations > 0 && <span className="usage-warn">Last free generation</span>}
-                {remainingGenerations === 0 && <span className="usage-limit">Limit reached — <a href="/plugins">Upgrade</a></span>}
+                {remainingGenerations === 0 && <span className="usage-limit">Limit reached — <button className="usage-upgrade-btn" onClick={handleUpgrade} disabled={upgrading}>{upgrading ? "..." : "Upgrade"}</button></span>}
               </div>
             )}
             <button className="generate-btn" onClick={handleGenerate} disabled={!canGenerate || loading || (authEnabled && !!user && !canUse("generate"))}>

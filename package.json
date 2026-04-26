@@ -12,12 +12,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
+    "@netlify/functions": "^5.2.0",
     "@supabase/supabase-js": "^2.104.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "googleapis": "^171.4.0",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "stripe": "^22.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
