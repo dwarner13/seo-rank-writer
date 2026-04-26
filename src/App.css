@@ -310,6 +310,16 @@
 .dash-article-status--archived { background: #f1f5f9; color: #64748b; }
 .dash-article-date { color: #94a3b8; }
 
+/* ── Usage Indicator ── */
+.usage-indicator {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0; margin-bottom: 6px; font-size: 0.78rem;
+}
+.usage-text { color: #64748b; font-weight: 500; }
+.usage-warn { color: #ca8a04; font-weight: 600; }
+.usage-limit { color: #dc2626; font-weight: 600; }
+.usage-limit a { color: #6366f1; text-decoration: underline; }
+
 /* ── Override old layout to fit inside new content area ── */
 .app--v2 .layout {
   display: grid;

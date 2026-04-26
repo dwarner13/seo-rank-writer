@@ -6,9 +6,10 @@ import type { Profile, UsageLimits } from "./database";
 type Plan = "free" | "pro" | "agency";
 type Feature = "generate" | "wordpress" | "media" | "gsc" | "report_full" | "backlinks_full" | "links_unlimited";
 
-const FREE_LIMITS = {
-  generations: 3,
-  links: 5,
+const PLAN_LIMITS: Record<Plan, { generations: number; links: number }> = {
+  free: { generations: 3, links: 5 },
+  pro: { generations: 100, links: Infinity },
+  agency: { generations: 500, links: Infinity },
 };
 
 interface PlanState {
@@ -18,6 +19,8 @@ interface PlanState {
   profile: Profile | null;
   canUse: (feature: Feature) => boolean;
   remainingGenerations: number;
+  generationsUsed: number;
+  generationLimit: number;
   refreshPlan: () => Promise<void>;
 }
 
@@ -28,6 +31,8 @@ const PlanContext = createContext<PlanState>({
   profile: null,
   canUse: () => true,
   remainingGenerations: 3,
+  generationsUsed: 0,
+  generationLimit: 3,
   refreshPlan: async () => {},
 });
 
@@ -68,36 +73,32 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     refreshPlan();
   }, [refreshPlan]);
 
+  const limits = PLAN_LIMITS[plan];
   const generationsUsed = usage?.generations ?? 0;
-  const remainingGenerations = plan === "free"
-    ? Math.max(0, FREE_LIMITS.generations - generationsUsed)
-    : Infinity;
+  const generationLimit = limits.generations;
+  const remainingGenerations = Math.max(0, generationLimit - generationsUsed);
 
   const canUse = useCallback((feature: Feature): boolean => {
     // If Supabase not configured, allow everything (local dev mode)
     if (!enabled) return true;
-    // Pro/Agency: everything unlocked
-    if (plan === "pro" || plan === "agency") return true;
 
-    // Free plan gates
     switch (feature) {
       case "generate":
-        return generationsUsed < FREE_LIMITS.generations;
+        return generationsUsed < PLAN_LIMITS[plan].generations;
       case "wordpress":
       case "media":
       case "gsc":
       case "report_full":
       case "backlinks_full":
-        return false;
       case "links_unlimited":
-        return false;
+        return plan === "pro" || plan === "agency";
       default:
         return true;
     }
   }, [enabled, plan, generationsUsed]);
 
   return (
-    <PlanContext.Provider value={{ plan, loading, usage, profile, canUse, remainingGenerations, refreshPlan }}>
+    <PlanContext.Provider value={{ plan, loading, usage, profile, canUse, remainingGenerations, generationsUsed, generationLimit, refreshPlan }}>
       {children}
     </PlanContext.Provider>
   );

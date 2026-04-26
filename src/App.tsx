@@ -13,7 +13,8 @@ import MediaGenerator from "./components/MediaGenerator";
 import type { VideoPromptSet } from "./types";
 import type { ImagePromptSet } from "./services/media";
 import { useAuth } from "./lib/AuthContext";
-import { getProjects, createProject, updateProject, saveArticle, getArticles } from "./lib/database";
+import { getProjects, createProject, updateProject, saveArticle, getArticles, incrementUsage } from "./lib/database";
+import { usePlan } from "./lib/PlanContext";
 import "./App.css";
 
 const STORAGE_KEY = "seo-content-factory-state";
@@ -125,6 +126,7 @@ function generateGbpContent(opts: { businessName: string; mainKeyword: string; l
 
 function App() {
   const { user, signOut, enabled: authEnabled } = useAuth();
+  const { canUse, remainingGenerations, generationsUsed, generationLimit, plan, refreshPlan } = usePlan();
   const saved = loadSaved();
   const restoredFromSave = !!saved;
 
@@ -636,6 +638,14 @@ function App() {
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
+
+    // Check usage limits (only when Supabase is active)
+    if (authEnabled && user && !canUse("generate")) {
+      console.log("[Usage] Limit reached:", generationsUsed, "/", generationLimit);
+      setError(`You've reached your ${plan} plan limit of ${generationLimit} articles this month. Upgrade to continue generating.`);
+      return;
+    }
+
     setLoading(true); setError("");
     try {
       const generated = await generateContent({
@@ -689,6 +699,13 @@ function App() {
           console.log("[Article] Article saved to Supabase:", saved.id);
           setSupabaseArticleId(saved.id);
           setSavedArticles(prev => [{ id: saved.id, title: saved.meta_title || saved.title || "Untitled", main_keyword: saved.main_keyword || "", created_at: saved.created_at, status: saved.status }, ...prev]);
+
+          // Increment monthly usage
+          const incOk = await incrementUsage(user.id, "generations");
+          if (incOk) {
+            console.log("[Usage] Incremented article generation");
+            refreshPlan(); // Refresh usage state
+          }
         }
       } else {
         console.log("[Article] Supabase unavailable, using localStorage fallback");
@@ -1876,7 +1893,14 @@ function App() {
           </div>
 
           <div className="sticky-generate">
-            <button className="generate-btn" onClick={handleGenerate} disabled={!canGenerate || loading}>
+            {authEnabled && user && (
+              <div className="usage-indicator">
+                <span className="usage-text">{generationsUsed} / {generationLimit} articles this month</span>
+                {remainingGenerations <= 1 && remainingGenerations > 0 && <span className="usage-warn">Last free generation</span>}
+                {remainingGenerations === 0 && <span className="usage-limit">Limit reached — <a href="/plugins">Upgrade</a></span>}
+              </div>
+            )}
+            <button className="generate-btn" onClick={handleGenerate} disabled={!canGenerate || loading || (authEnabled && !!user && !canUse("generate"))}>
               {loading ? "Generating..." : "Generate SEO Content"}
             </button>
           </div>
