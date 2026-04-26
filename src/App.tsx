@@ -30,6 +30,8 @@ interface AppSettings {
   socialLinkedin: string;
   socialTiktok: string;
   gscProperty: string;
+  fullName: string;
+  accountEmail: string;
 }
 
 function loadSettings(): AppSettings {
@@ -37,14 +39,14 @@ function loadSettings(): AppSettings {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) return JSON.parse(raw);
   } catch { /* ignore */ }
-  return { phone: "", email: "", serviceArea: "", defaultKeyword: "", brandTone: "professional", socialFacebook: "", socialInstagram: "", socialLinkedin: "", socialTiktok: "", gscProperty: "" };
+  return { phone: "", email: "", serviceArea: "", defaultKeyword: "", brandTone: "professional", socialFacebook: "", socialInstagram: "", socialLinkedin: "", socialTiktok: "", gscProperty: "", fullName: "", accountEmail: "" };
 }
 
 function saveSettings(s: AppSettings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
 }
 
-type Tab = "dashboard" | "article" | "metadata" | "schema" | "social" | "gbp" | "media" | "mediagen" | "score" | "wordpress" | "analytics" | "settings" | "insights";
+type Tab = "dashboard" | "article" | "metadata" | "schema" | "social" | "gbp" | "media" | "mediagen" | "score" | "wordpress" | "analytics" | "settings" | "account" | "insights";
 
 const SIDEBAR_ITEMS: { key: Tab; label: string; icon: string }[] = [
   { key: "dashboard", label: "Dashboard", icon: "\u2302" },
@@ -58,7 +60,8 @@ const SIDEBAR_ITEMS: { key: Tab; label: string; icon: string }[] = [
   { key: "analytics", label: "SEO Analytics", icon: "\uD83D\uDCCA" },
   { key: "wordpress", label: "WordPress", icon: "\uD83C\uDF10" },
   { key: "score", label: "SEO Score", icon: "\u2713" },
-  { key: "settings", label: "Settings", icon: "\u2699" },
+  { key: "settings", label: "Project Settings", icon: "\u2699" },
+  { key: "account", label: "Account", icon: "\uD83D\uDC64" },
 ];
 
 // Keep old TABS for backward compat
@@ -362,6 +365,8 @@ function App() {
     updateSetting("serviceArea", "Calgary, Airdrie, Okotoks, Chestermere");
     updateSetting("defaultKeyword", "emergency plumber calgary");
     updateSetting("brandTone", "trust");
+    updateSetting("fullName", "Demo User");
+    updateSetting("accountEmail", "demo@seorankwriter.com");
 
     setDemoMode(true);
     setActiveTab("dashboard");
@@ -1393,9 +1398,9 @@ function App() {
               </span>
             )}
             {wpConnected && <span className="topbar__badge topbar__badge--green">WP Connected</span>}
-            <button className="topbar__profile" onClick={() => setActiveTab("settings")} title="Settings">
-              <span className="topbar__profile-avatar">{user?.email ? user.email[0].toUpperCase() : businessName ? businessName[0].toUpperCase() : "U"}</span>
-              <span className="topbar__profile-name">{user?.user_metadata?.full_name || user?.email?.split("@")[0] || businessName || "Settings"}</span>
+            <button className="topbar__profile" onClick={() => setActiveTab("account")} title="Account">
+              <span className="topbar__profile-avatar">{(user?.email || settings.accountEmail || settings.fullName || "U")[0].toUpperCase()}</span>
+              <span className="topbar__profile-name">{user?.user_metadata?.full_name || settings.fullName || user?.email?.split("@")[0] || settings.accountEmail || "Account"}</span>
             </button>
           </div>
         </header>
@@ -1406,7 +1411,7 @@ function App() {
           ) : activeTab === "settings" ? (
             <div className="settings-page">
               <div className="settings-wrap">
-                <h2 className="settings-section-title">Business Profile</h2>
+                <h2 className="settings-section-title">Project Details</h2>
                 <div className="settings-grid">
                   <div className="field"><label>Business Name</label><input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Your business name" /></div>
                   <div className="field"><label>Website URL</label><input type="text" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://example.com" /></div>
@@ -1441,20 +1446,61 @@ function App() {
                     <button className="inline-btn" style={{ marginTop: 8 }} onClick={() => setActiveTab("analytics")}>Configure</button>
                   </div>
                 </div>
+              </div>
+            </div>
+          ) : activeTab === "account" ? (
+            <div className="settings-page">
+              <div className="settings-wrap">
+                {/* Profile card */}
+                <div className="acct-profile-card">
+                  <div className="acct-avatar">{(user?.email || settings.fullName || settings.accountEmail || "U")[0].toUpperCase()}</div>
+                  <div className="acct-profile-info">
+                    <div className="acct-name">{user?.user_metadata?.full_name || settings.fullName || "Set your name below"}</div>
+                    <div className="acct-email">{user?.email || settings.accountEmail || "No email set"}</div>
+                    <span className="acct-plan-badge">Free</span>
+                  </div>
+                </div>
+
+                <h2 className="settings-section-title">Profile</h2>
+                <div className="settings-grid">
+                  <div className="field">
+                    <label>Full Name</label>
+                    <input type="text" value={authEnabled && user?.user_metadata?.full_name ? user.user_metadata.full_name : settings.fullName} onChange={(e) => updateSetting("fullName", e.target.value)} placeholder="Your name" readOnly={!!(authEnabled && user?.user_metadata?.full_name)} style={authEnabled && user?.user_metadata?.full_name ? { background: "#f8fafc" } : {}} />
+                  </div>
+                  <div className="field">
+                    <label>Email</label>
+                    <input type="email" value={user?.email || settings.accountEmail} onChange={(e) => updateSetting("accountEmail", e.target.value)} placeholder="you@example.com" readOnly={!!(authEnabled && user)} style={authEnabled && user ? { background: "#f8fafc" } : {}} />
+                  </div>
+                </div>
+
                 {authEnabled && user && (
                   <>
-                    <h2 className="settings-section-title">Account</h2>
-                    <div className="settings-grid">
-                      <div className="field"><label>Email</label><input type="text" value={user.email || ""} readOnly style={{ background: "#f8fafc" }} /></div>
-                      <div className="field"><label>User ID</label><input type="text" value={user.id.slice(0, 16) + "..."} readOnly style={{ background: "#f8fafc", fontFamily: "monospace", fontSize: "0.82rem" }} /></div>
+                    <div className="settings-grid" style={{ marginTop: 8 }}>
+                      <div className="field"><label>User ID</label><input type="text" value={user.id.slice(0, 20) + "..."} readOnly style={{ background: "#f8fafc", fontFamily: "monospace", fontSize: "0.82rem" }} /></div>
+                      <div className="field"><label>Auth Provider</label><input type="text" value={user.app_metadata?.provider || "email"} readOnly style={{ background: "#f8fafc" }} /></div>
                     </div>
                   </>
                 )}
-                <h2 className="settings-section-title">Plan</h2>
+
+                <h2 className="settings-section-title">Plan &amp; Billing</h2>
                 <div className="settings-plan-card">
                   <div className="settings-plan-name">Free Plan</div>
-                  <div className="settings-plan-desc">Upgrade to Pro for unlimited pages, WordPress publishing, and more.</div>
+                  <div className="settings-plan-desc">Upgrade to Pro for unlimited pages, WordPress publishing, media engine, and more.</div>
                   <a href="/plugins" className="inline-btn" style={{ textDecoration: "none", display: "inline-block", marginTop: 8 }}>Upgrade to Pro</a>
+                </div>
+                <div className="acct-billing-placeholder">
+                  <p>Billing management will be available here once you upgrade to a paid plan.</p>
+                </div>
+
+                <h2 className="settings-section-title">Security</h2>
+                <div className="acct-security-placeholder">
+                  <p>Password management and two-factor authentication coming soon.</p>
+                  {authEnabled && user && (
+                    <button className="acct-signout-btn" onClick={() => { signOut(); window.location.href = "/"; }}>Sign Out</button>
+                  )}
+                  {!authEnabled && (
+                    <p style={{ fontSize: "0.82rem", color: "#94a3b8", marginTop: 8 }}>Authentication is not configured. Data is stored locally.</p>
+                  )}
                 </div>
               </div>
             </div>

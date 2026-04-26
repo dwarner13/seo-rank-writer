@@ -577,6 +577,42 @@
 .settings-plan-name { font-size: 1rem; font-weight: 700; color: #0f172a; }
 .settings-plan-desc { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
 
+/* ── Account Settings ── */
+.acct-profile-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px; background: #fff; border: 1px solid #e2e8f0;
+  border-radius: 14px; margin-bottom: 24px;
+}
+.acct-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; font-size: 1.4rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.acct-name { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+.acct-email { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+.acct-plan-badge {
+  display: inline-block; margin-top: 6px;
+  padding: 3px 12px; border-radius: 12px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  background: #f1f5f9; color: #475569;
+}
+.acct-billing-placeholder, .acct-security-placeholder {
+  padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 10px; margin-top: 10px;
+}
+.acct-billing-placeholder p, .acct-security-placeholder p {
+  font-size: 0.85rem; color: #64748b; margin: 0;
+}
+.acct-signout-btn {
+  margin-top: 12px; padding: 8px 20px;
+  background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background 0.15s;
+}
+.acct-signout-btn:hover { background: #fee2e2; }
+
 /* ── Insights Page ── */
 .insights-page { padding: 24px; overflow-y: auto; max-height: calc(100vh - 56px); }
 .insights-wrap { max-width: 900px; }
