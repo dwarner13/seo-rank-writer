@@ -1,4 +1,20 @@
+import { useState } from "react";
 import "./LandingPage.css";
+
+function ProductImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div className="lp-img-placeholder">
+        <div className="lp-img-placeholder__icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        </div>
+        <span>Product screenshot coming soon</span>
+      </div>
+    );
+  }
+  return <img src={src} alt={alt} className="lp-product-img" onError={() => setFailed(true)} loading="lazy" />;
+}
 
 export default function LandingPage() {
   return (
@@ -36,6 +52,21 @@ export default function LandingPage() {
           <div className="lp-hero__proof">
             <span className="lp-hero__dot" />
             Trusted by local businesses across North America
+          </div>
+
+          {/* Hero Product Preview */}
+          <div className="lp-hero-preview">
+            <div className="lp-browser-frame">
+              <div className="lp-browser-dots">
+                <span /><span /><span />
+              </div>
+              <ProductImage src="/marketing/dashboard-demo.png" alt="SEO Rank Writer Dashboard" />
+            </div>
+            <div className="lp-hero-badges">
+              <span className="lp-hero-fbadge lp-hero-fbadge--green">SEO Score 72</span>
+              <span className="lp-hero-fbadge lp-hero-fbadge--blue">WP Connected</span>
+              <span className="lp-hero-fbadge lp-hero-fbadge--purple">Demo Project</span>
+            </div>
           </div>
         </div>
       </section>
@@ -91,20 +122,66 @@ export default function LandingPage() {
       <section className="lp-section lp-section--dark" id="how">
         <div className="lp-wrap">
           <div className="lp-section__label lp-section__label--light">How It Works</div>
-          <h2 className="lp-section__h2 lp-section__h2--light">Four Steps. One Rankable Page.</h2>
-          <div className="lp-steps">
-            {[
-              { num: "1", title: "Enter Your Keyword", desc: "Type your main keyword, location, and business name. Select page type, tone, and word count." },
-              { num: "2", title: "Generate Content", desc: "AI creates a full SEO article, meta tags, schema markup, social posts, image prompts, and video storyboard." },
-              { num: "3", title: "Send to WordPress", desc: "One click. The page goes to WordPress as a draft with all SEO fields filled — title, description, slug, schema." },
-              { num: "4", title: "Publish and Rank", desc: "Review the draft, hit publish. Track performance in the built-in analytics dashboard." },
-            ].map((step, i) => (
-              <div key={i} className="lp-step">
-                <div className="lp-step__num">{step.num}</div>
-                <h3 className="lp-step__title">{step.title}</h3>
-                <p className="lp-step__desc">{step.desc}</p>
+          <h2 className="lp-section__h2 lp-section__h2--light">Three Steps to Rankable Pages</h2>
+          <div className="lp-hiw-cards">
+            <div className="lp-hiw-card">
+              <div className="lp-hiw-card__num">1</div>
+              <h3 className="lp-hiw-card__title">Generate SEO Content</h3>
+              <p className="lp-hiw-card__desc">Enter your keyword and location. AI creates a full article, meta tags, schema, social posts, and media prompts.</p>
+              <div className="lp-hiw-card__img">
+                <ProductImage src="/marketing/article-generator-demo.png" alt="SEO Content Generator" />
               </div>
-            ))}
+            </div>
+            <div className="lp-hiw-card">
+              <div className="lp-hiw-card__num">2</div>
+              <h3 className="lp-hiw-card__title">Optimize with SEO Score</h3>
+              <p className="lp-hiw-card__desc">Real-time scoring across 6 categories: content, metadata, schema, internal links, GSC, and WordPress readiness.</p>
+              <div className="lp-hiw-card__img">
+                <ProductImage src="/marketing/dashboard-demo.png" alt="SEO Score Dashboard" />
+              </div>
+            </div>
+            <div className="lp-hiw-card">
+              <div className="lp-hiw-card__num">3</div>
+              <h3 className="lp-hiw-card__title">Publish to WordPress</h3>
+              <p className="lp-hiw-card__desc">One click sends your page as a draft with all SEO fields filled — title, description, slug, schema, Open Graph.</p>
+              <div className="lp-hiw-card__img">
+                <ProductImage src="/marketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Media Engine Feature ── */}
+      <section className="lp-section lp-section--light">
+        <div className="lp-wrap">
+          <div className="lp-showcase">
+            <div className="lp-showcase__text">
+              <div className="lp-section__label">Media Engine</div>
+              <h2 className="lp-section__h2">AI Images &amp; Video Prompts Built In</h2>
+              <p className="lp-showcase__desc">Create SEO content, social posts, image ideas, and video scenes from one local keyword. Featured images, social squares, story covers, 3-scene storyboards, and Sora-ready video prompts.</p>
+              <a href="/app" className="lp-btn lp-btn--primary" style={{ marginTop: 16 }}>Try Media Engine</a>
+            </div>
+            <div className="lp-showcase__img">
+              <ProductImage src="/marketing/media-engine-demo.png" alt="Media Engine" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WordPress Publishing Feature ── */}
+      <section className="lp-section">
+        <div className="lp-wrap">
+          <div className="lp-showcase lp-showcase--reverse">
+            <div className="lp-showcase__text">
+              <div className="lp-section__label">WordPress</div>
+              <h2 className="lp-section__h2">Publish SEO Pages to WordPress in One Click</h2>
+              <p className="lp-showcase__desc">Send content, meta title, description, schema, SEO score, and all fields directly to your WordPress site as a draft. Our plugin saves everything — ready to review and publish.</p>
+              <a href="/plugins" className="lp-btn lp-btn--outline" style={{ marginTop: 16 }}>Get the Plugin</a>
+            </div>
+            <div className="lp-showcase__img">
+              <ProductImage src="/marketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
+            </div>
           </div>
         </div>
       </section>
