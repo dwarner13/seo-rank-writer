@@ -252,6 +252,7 @@ function App() {
   }, [saveToStorage]);
 
   const [demoMode, setDemoMode] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLoadDemo = () => {
     setBusinessName("Calgary Emergency Plumbing");
@@ -1336,8 +1337,11 @@ function App() {
 
   return (
     <div className="app app--v2">
+      {/* ── Mobile overlay ── */}
+      {mobileMenuOpen && <div className="sidebar-overlay" onClick={() => setMobileMenuOpen(false)} />}
+
       {/* ── Sidebar ── */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${mobileMenuOpen ? "sidebar--open" : ""}`}>
         <div className="sidebar__brand">
           <div className="sidebar__logo">SR</div>
           <div className="sidebar__brand-text">
@@ -1350,7 +1354,7 @@ function App() {
             <button
               key={item.key}
               className={`sidebar__item ${activeTab === item.key ? "sidebar__item--active" : ""}`}
-              onClick={() => setActiveTab(item.key)}
+              onClick={() => { setActiveTab(item.key); setMobileMenuOpen(false); }}
             >
               <span className="sidebar__item-icon">{item.icon}</span>
               <span className="sidebar__item-label">{item.label}</span>
@@ -1370,6 +1374,9 @@ function App() {
       <div className="app-main">
         <header className="topbar">
           <div className="topbar__left">
+            <button className="topbar__hamburger" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
             <h1 className="topbar__title">
               {SIDEBAR_ITEMS.find(s => s.key === activeTab)?.label || "Dashboard"}
             </h1>

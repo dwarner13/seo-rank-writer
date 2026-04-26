@@ -162,6 +162,11 @@
   top: 0;
   z-index: 40;
 }
+.topbar__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .topbar__title {
   font-size: 1.15rem;
   font-weight: 700;
@@ -341,11 +346,63 @@
 }
 
 /* ── Responsive ── */
+/* ── Hamburger button (hidden on desktop) ── */
+.topbar__hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.topbar__hamburger:hover { background: #f1f5f9; }
+
+/* ── Mobile overlay ── */
+.sidebar-overlay {
+  display: none;
+}
+
 /* ── Tablet (1024px) ── */
 @media (max-width: 1024px) {
   .app--v2 { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .app--v2 .tabs--hidden { display: flex; overflow-x: auto; }
+
+  /* Hamburger visible */
+  .topbar__hamburger { display: flex; }
+
+  /* Sidebar: off-screen by default, slides in when open */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+  }
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Overlay */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 199;
+    animation: fadeOverlay 0.2s ease;
+  }
+  @keyframes fadeOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .app--v2 .tabs--hidden { display: none; }
   .dash-stats { grid-template-columns: 1fr 1fr; }
   .dash-quick-actions { grid-template-columns: 1fr 1fr; }
   .app--v2 .layout { grid-template-columns: 320px 1fr; }
