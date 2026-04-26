@@ -13,6 +13,7 @@ import MediaGenerator from "./components/MediaGenerator";
 import type { VideoPromptSet } from "./types";
 import type { ImagePromptSet } from "./services/media";
 import { useAuth } from "./lib/AuthContext";
+import { getProjects, createProject, updateProject } from "./lib/database";
 import "./App.css";
 
 const STORAGE_KEY = "seo-content-factory-state";
@@ -229,10 +230,103 @@ function App() {
   const [videoPrompts, setVideoPrompts] = useState<VideoPromptSet | null>(saved?.videoPrompts ?? null);
   const [imagePrompts, setImagePrompts] = useState<ImagePromptSet | null>(saved?.imagePrompts ?? null);
 
+  // ── Supabase Project Sync ──
+  const [supabaseProjectId, setSupabaseProjectId] = useState<string | null>(null);
+  const [projectLoaded, setProjectLoaded] = useState(false);
+
+  // Load project from Supabase on mount (if logged in)
+  useEffect(() => {
+    if (!authEnabled || !user) {
+      console.log("[Project] Supabase unavailable, using localStorage fallback");
+      setProjectLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      console.log("[Project] Loading projects from Supabase");
+      const projects = await getProjects(user.id);
+      if (cancelled) return;
+
+      if (projects.length > 0) {
+        const p = projects[0]; // Use most recent active project
+        console.log("[Project] Loaded project:", p.name, p.id);
+        setSupabaseProjectId(p.id);
+
+        // Only hydrate fields if localStorage is empty (first load after login)
+        if (!saved?.businessName && p.name) {
+          setBusinessName(p.name);
+          setWebsiteUrl(p.website_url || "");
+          if (p.default_keyword) setMainKeyword(p.default_keyword);
+          if (p.brand_tone) setTone(p.brand_tone as Tone);
+
+          // Hydrate settings from project
+          const next: AppSettings = {
+            ...settings,
+            phone: p.phone || "",
+            email: p.email || "",
+            serviceArea: p.service_area || "",
+            defaultKeyword: p.default_keyword || "",
+            brandTone: p.brand_tone || "professional",
+            socialFacebook: p.social_facebook || "",
+            socialInstagram: p.social_instagram || "",
+            socialLinkedin: p.social_linkedin || "",
+            socialTiktok: p.social_tiktok || "",
+          };
+          setSettings(next);
+          saveSettings(next);
+        }
+      }
+      setProjectLoaded(true);
+    })();
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authEnabled, user?.id]);
+
+  // Save project to Supabase when settings change (debounced)
+  const saveProjectToSupabase = useCallback(async () => {
+    if (!authEnabled || !user) return;
+
+    const projectData = {
+      name: businessName || "Untitled Project",
+      website_url: websiteUrl || null,
+      phone: settings.phone || null,
+      email: settings.email || null,
+      service_area: settings.serviceArea || null,
+      default_keyword: settings.defaultKeyword || mainKeyword || null,
+      brand_tone: settings.brandTone || tone || "professional",
+      social_facebook: settings.socialFacebook || null,
+      social_instagram: settings.socialInstagram || null,
+      social_linkedin: settings.socialLinkedin || null,
+      social_tiktok: settings.socialTiktok || null,
+    };
+
+    if (supabaseProjectId) {
+      // Update existing project
+      const ok = await updateProject(supabaseProjectId, projectData);
+      if (ok) console.log("[Project] Project saved to Supabase (update)");
+    } else if (businessName.trim()) {
+      // Create new project only when there's a name
+      const created = await createProject(user.id, projectData);
+      if (created) {
+        console.log("[Project] Project saved to Supabase (create)", created.id);
+        setSupabaseProjectId(created.id);
+      }
+    }
+  }, [authEnabled, user, supabaseProjectId, businessName, websiteUrl, mainKeyword, tone, settings]);
+
+  // Debounced Supabase save — triggers 2s after project fields change
+  useEffect(() => {
+    if (!projectLoaded || !authEnabled || !user) return;
+    const timer = setTimeout(saveProjectToSupabase, 2000);
+    return () => clearTimeout(timer);
+  }, [saveProjectToSupabase, projectLoaded, authEnabled, user]);
+
   const resultsRef = useRef<HTMLDivElement>(null);
   const canGenerate = mainKeyword.trim() || existingArticle.trim();
 
-  // Auto-save
+  // Auto-save to localStorage (always, as fallback)
   const saveToStorage = useCallback(() => {
     const state: SavedState = {
       businessName, websiteUrl, pageType, mainKeyword, location,
@@ -242,13 +336,13 @@ function App() {
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      setSaveStatus("Saved locally");
+      setSaveStatus(authEnabled && user ? "Saved to cloud" : "Saved locally");
     } catch { /* storage full */ }
   }, [
     businessName, websiteUrl, pageType, mainKeyword, location,
     secondaryKeywords, sitemapUrls, internalLinks, externalLinks,
     wordCount, tone, customInstructions, existingArticle, result,
-    wpSiteUrl, wpUsername, videoPrompts, imagePrompts,
+    wpSiteUrl, wpUsername, videoPrompts, imagePrompts, authEnabled, user,
   ]);
 
   useEffect(() => {
