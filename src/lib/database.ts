@@ -52,8 +52,16 @@ export interface Article {
   schema_json: string | null;
   url_slug: string | null;
   word_count: number | null;
+  facebook: string | null;
+  instagram: string | null;
+  linkedin: string | null;
+  tiktok_script: string | null;
+  hashtags: string[] | null;
+  keyword_suggestions: string[] | null;
+  internal_links: string | null;
   status: "draft" | "published" | "archived";
   wp_post_id: number | null;
+  wp_published_at: string | null;
   created_at: string;
   updated_at: string;
 }

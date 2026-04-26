@@ -13,7 +13,7 @@ import MediaGenerator from "./components/MediaGenerator";
 import type { VideoPromptSet } from "./types";
 import type { ImagePromptSet } from "./services/media";
 import { useAuth } from "./lib/AuthContext";
-import { getProjects, createProject, updateProject } from "./lib/database";
+import { getProjects, createProject, updateProject, saveArticle, getArticles } from "./lib/database";
 import "./App.css";
 
 const STORAGE_KEY = "seo-content-factory-state";
@@ -232,6 +232,9 @@ function App() {
 
   // ── Supabase Project Sync ──
   const [supabaseProjectId, setSupabaseProjectId] = useState<string | null>(null);
+  const [supabaseArticleId, setSupabaseArticleId] = useState<string | null>(null);
+  void supabaseArticleId; // will be used for article updates in next phase
+  const [savedArticles, setSavedArticles] = useState<{ id: string; title: string; main_keyword: string; created_at: string; status: string }[]>([]);
   const [projectLoaded, setProjectLoaded] = useState(false);
 
   // Load project from Supabase on mount (if logged in)
@@ -275,6 +278,22 @@ function App() {
           };
           setSettings(next);
           saveSettings(next);
+        }
+
+        // Load articles for this project
+        if (p) {
+          console.log("[Article] Loading articles from Supabase for project", p.id);
+          const articles = await getArticles(p.id);
+          if (!cancelled && articles.length > 0) {
+            setSavedArticles(articles.map(a => ({
+              id: a.id,
+              title: a.meta_title || a.title || "Untitled",
+              main_keyword: a.main_keyword || "",
+              created_at: a.created_at,
+              status: a.status,
+            })));
+            console.log("[Article] Loaded", articles.length, "articles from Supabase");
+          }
         }
       }
       setProjectLoaded(true);
@@ -631,9 +650,49 @@ function App() {
         socialImagePrompts: generateSocialImagePrompts(mediaCtx),
         videoPlan: generateVideoPlan(mediaCtx),
       };
-      setResult({ ...generated, ...gbp, ...media });
+      const fullResult = { ...generated, ...gbp, ...media };
+      setResult(fullResult);
       setActiveTab("article");
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+
+      // Save to Supabase if logged in + project exists
+      if (authEnabled && user && supabaseProjectId) {
+        console.log("[Article] Saving article to Supabase");
+        const articleWordCount = fullResult.article.replace(/<[^>]*>/g, "").trim().split(/\s+/).length;
+        const saved = await saveArticle({
+          project_id: supabaseProjectId,
+          user_id: user.id,
+          title: fullResult.metaTitle || mainKeyword || "Untitled",
+          slug: fullResult.urlSlug || null,
+          main_keyword: mainKeyword || null,
+          location: location || null,
+          page_type: pageType || null,
+          article_html: fullResult.article || null,
+          meta_title: fullResult.metaTitle || null,
+          meta_description: fullResult.metaDescription || null,
+          focus_keyword: fullResult.focusKeyword || null,
+          schema_json: fullResult.schema || null,
+          url_slug: fullResult.urlSlug || null,
+          word_count: articleWordCount,
+          facebook: fullResult.facebook || null,
+          instagram: fullResult.instagram || null,
+          linkedin: fullResult.linkedin || null,
+          tiktok_script: fullResult.tiktokScript || null,
+          hashtags: fullResult.hashtags || null,
+          keyword_suggestions: fullResult.keywordSuggestions || null,
+          internal_links: internalLinks || null,
+          status: "draft",
+          wp_post_id: null,
+          wp_published_at: null,
+        });
+        if (saved) {
+          console.log("[Article] Article saved to Supabase:", saved.id);
+          setSupabaseArticleId(saved.id);
+          setSavedArticles(prev => [{ id: saved.id, title: saved.meta_title || saved.title || "Untitled", main_keyword: saved.main_keyword || "", created_at: saved.created_at, status: saved.status }, ...prev]);
+        }
+      } else {
+        console.log("[Article] Supabase unavailable, using localStorage fallback");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally { setLoading(false); }
@@ -1430,6 +1489,23 @@ function App() {
               <span>Keywords: {result.keywordSuggestions?.length || 0}</span>
               <span>Schema: {result.schema ? "Yes" : "No"}</span>
             </div>
+          </div>
+        </div>
+      )}
+      {savedArticles.length > 0 && (
+        <div className="dash-preview-section">
+          <h3>Recent Articles ({savedArticles.length})</h3>
+          <div className="dash-articles-list">
+            {savedArticles.slice(0, 5).map((a) => (
+              <div key={a.id} className="dash-article-row">
+                <div className="dash-article-title">{a.title}</div>
+                <div className="dash-article-meta">
+                  {a.main_keyword && <span className="dash-article-kw">{a.main_keyword}</span>}
+                  <span className={`dash-article-status dash-article-status--${a.status}`}>{a.status}</span>
+                  <span className="dash-article-date">{new Date(a.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
