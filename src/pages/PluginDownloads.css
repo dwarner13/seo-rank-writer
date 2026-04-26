@@ -30,6 +30,9 @@
   font-weight: 800;
   color: #1a1a2e;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .pd-nav__links {
   display: flex;

@@ -5,7 +5,7 @@ export default function TermsOfService() {
     <div className="legal">
       <nav className="legal-nav">
         <div className="legal-nav__inner">
-          <a href="/" className="legal-nav__logo">SEO Rank Writer</a>
+          <a href="/" className="legal-nav__logo"><img src="/logo.png" alt="SEO Rank Writer Logo" style={{ width: 28, height: 28, borderRadius: 7, objectFit: "contain" as const }} /> SEO Rank Writer</a>
           <div className="legal-nav__links">
             <a href="/app">Open App</a>
             <a href="/privacy">Privacy Policy</a>

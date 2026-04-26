@@ -32,7 +32,7 @@ export default function SignupPage({ onNavigate }: { onNavigate: (path: string) 
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">SR</div>
+        <img src="/logo.png" alt="SEO Rank Writer Logo" className="auth-logo-img" />
         <h1 className="auth-title">Create your account</h1>
         <p className="auth-sub">Start generating SEO content in minutes.</p>
 

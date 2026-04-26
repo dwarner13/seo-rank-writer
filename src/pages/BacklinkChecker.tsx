@@ -70,7 +70,7 @@ export default function BacklinkChecker() {
       {/* Nav */}
       <nav className="bl-nav">
         <div className="bl-wrap">
-          <a href="/" className="bl-nav__logo">SEO Rank Writer</a>
+          <a href="/" className="bl-nav__logo"><img src="/logo.png" alt="SEO Rank Writer Logo" style={{ width: 28, height: 28, borderRadius: 7, objectFit: "contain" as const }} /> SEO Rank Writer</a>
           <div className="bl-nav__links">
             <a href="/app">Open App</a>
             <a href="/plugins">Plugin</a>

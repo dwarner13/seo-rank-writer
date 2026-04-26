@@ -77,6 +77,20 @@
   color: #1a1a2e;
   text-decoration: none;
   letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lp-nav__logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+.lp-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .lp-nav__links {
   display: flex;
@@ -745,11 +759,6 @@
   align-items: center;
   justify-content: space-between;
 }
-.lp-footer__brand {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1a1a2e;
-}
 .lp-footer__text {
   font-size: 0.85rem;
   color: #94a3b8;
@@ -796,6 +805,8 @@
   .lp-price-card--featured { transform: none; }
   .lp-cta-final__h2 { font-size: 1.8rem; }
   .lp-nav__links a:not(.lp-nav__cta) { display: none; }
+  .lp-nav__logo-img { width: 24px; height: 24px; }
+  .lp-nav__logo span { font-size: 0.95rem; }
   .lp-footer__inner { flex-direction: column; gap: 6px; text-align: center; }
   .lp-hero__ctas { flex-direction: column; align-items: center; }
   .lp-btn { width: 100%; max-width: 300px; justify-content: center; }

@@ -26,6 +26,9 @@
   font-weight: 800;
   color: #1a1a2e;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .bl-nav__links { display: flex; gap: 20px; }
 .bl-nav__links a {

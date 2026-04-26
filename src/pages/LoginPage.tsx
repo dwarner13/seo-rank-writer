@@ -29,7 +29,7 @@ export default function LoginPage({ onNavigate }: { onNavigate: (path: string) =
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">SR</div>
+        <img src="/logo.png" alt="SEO Rank Writer Logo" className="auth-logo-img" />
         <h1 className="auth-title">Sign in to SEO Rank Writer</h1>
         <p className="auth-sub">Enter your email and password to continue.</p>
 

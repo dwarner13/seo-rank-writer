@@ -107,7 +107,7 @@ export default function SeoReport() {
     <div className="rp">
       <nav className="rp-nav">
         <div className="rp-wrap">
-          <a href="/" className="rp-nav__logo">SEO Rank Writer</a>
+          <a href="/" className="rp-nav__logo"><img src="/logo.png" alt="SEO Rank Writer Logo" style={{ width: 28, height: 28, borderRadius: 7, objectFit: "contain" as const }} /> SEO Rank Writer</a>
           <div className="rp-nav__links">
             <a href="/app">Open App</a>
             <a href="/backlinks">Backlinks</a>

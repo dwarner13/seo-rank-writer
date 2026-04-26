@@ -22,7 +22,10 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <nav className="lp-nav">
         <div className="lp-nav__inner">
-          <a href="/" className="lp-nav__logo">SEO Rank Writer</a>
+          <a href="/" className="lp-nav__logo">
+            <img src="/logo.png" alt="SEO Rank Writer Logo" className="lp-nav__logo-img" />
+            <span>SEO Rank Writer</span>
+          </a>
           <div className="lp-nav__links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
@@ -350,7 +353,10 @@ export default function LandingPage() {
       <footer className="lp-footer">
         <div className="lp-wrap">
           <div className="lp-footer__inner">
-            <div className="lp-footer__brand">SEO Rank Writer</div>
+            <div className="lp-footer__brand">
+              <img src="/logo.png" alt="SEO Rank Writer Logo" style={{ width: 24, height: 24, borderRadius: 6, objectFit: "contain" }} />
+              SEO Rank Writer
+            </div>
             <div className="lp-footer__links">
               <a href="/privacy">Privacy Policy</a>
               <a href="/terms">Terms of Service</a>

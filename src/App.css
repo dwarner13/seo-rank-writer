@@ -26,12 +26,9 @@
   padding: 20px 18px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.sidebar__logo {
-  width: 34px; height: 34px; border-radius: 10px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 0.85rem; color: #fff; flex-shrink: 0;
-  letter-spacing: -0.5px;
+.sidebar__logo-img {
+  width: 36px; height: 36px; border-radius: 10px;
+  object-fit: contain; flex-shrink: 0;
 }
 .sidebar__brand-text { display: flex; flex-direction: column; }
 .sidebar__name { font-size: 0.88rem; font-weight: 700; color: #e2e8f0; line-height: 1.2; }

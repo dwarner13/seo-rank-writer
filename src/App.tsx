@@ -1572,10 +1572,10 @@ function App() {
       {/* ── Sidebar ── */}
       <aside className={`sidebar ${mobileMenuOpen ? "sidebar--open" : ""}`}>
         <div className="sidebar__brand">
-          <div className="sidebar__logo">SR</div>
+          <img src="/logo.png" alt="SEO Rank Writer Logo" className="sidebar__logo-img" />
           <div className="sidebar__brand-text">
             <span className="sidebar__name">SEO Rank Writer</span>
-            <span className="sidebar__plan">Pro</span>
+            <span className="sidebar__plan">{plan === "free" ? "Free" : plan === "pro" ? "Pro" : "Agency"}</span>
           </div>
         </div>
         <nav className="sidebar__nav">

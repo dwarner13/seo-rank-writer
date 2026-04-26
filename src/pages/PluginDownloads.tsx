@@ -111,7 +111,7 @@ export default function PluginDownloads() {
       {/* Nav */}
       <nav className="pd-nav">
         <div className="pd-nav__inner">
-          <a href="/" className="pd-nav__logo">SEO Rank Writer</a>
+          <a href="/" className="pd-nav__logo"><img src="/logo.png" alt="SEO Rank Writer Logo" style={{ width: 28, height: 28, borderRadius: 7, objectFit: "contain" as const }} /> SEO Rank Writer</a>
           <div className="pd-nav__links">
             <a href="/app">Open App</a>
             <a href="/">Home</a>

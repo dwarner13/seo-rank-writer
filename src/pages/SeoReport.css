@@ -9,7 +9,7 @@
 /* Nav */
 .rp-nav { background: #fff; border-bottom: 1px solid #e5e7eb; }
 .rp-nav .rp-wrap { height: 56px; display: flex; align-items: center; justify-content: space-between; }
-.rp-nav__logo { font-size: 1.05rem; font-weight: 800; color: #1a1a2e; text-decoration: none; }
+.rp-nav__logo { font-size: 1.05rem; font-weight: 800; color: #1a1a2e; text-decoration: none; display: flex; align-items: center; gap: 8px; }
 .rp-nav__links { display: flex; gap: 20px; }
 .rp-nav__links a { font-size: 0.88rem; font-weight: 600; color: #475569; text-decoration: none; }
 .rp-nav__links a:hover { color: #2563eb; }
