@@ -134,6 +134,20 @@
   width: 100%;
 }
 .sidebar__clear:hover { background: rgba(239,68,68,0.2); }
+.sidebar__signout {
+  background: rgba(255,255,255,0.06);
+  color: #94a3b8;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  width: 100%;
+}
+.sidebar__signout:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
 .sidebar__home-link {
   font-size: 0.78rem;
   color: #64748b;

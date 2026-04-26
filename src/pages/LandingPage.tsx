@@ -46,7 +46,7 @@ export default function LandingPage() {
             Generate full SEO articles, metadata, schema, images, and videos — then publish to WordPress in one click.
           </p>
           <div className="lp-hero__ctas">
-            <a href="/app" className="lp-btn lp-btn--primary">Start Free Trial</a>
+            <a href="/signup" className="lp-btn lp-btn--primary">Start Free Trial</a>
             <a href="#how" className="lp-btn lp-btn--outline">Watch Demo</a>
           </div>
           <div className="lp-hero__proof">

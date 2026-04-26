@@ -12,6 +12,7 @@ import SeoAnalytics from "./components/SeoAnalytics";
 import MediaGenerator from "./components/MediaGenerator";
 import type { VideoPromptSet } from "./types";
 import type { ImagePromptSet } from "./services/media";
+import { useAuth } from "./lib/AuthContext";
 import "./App.css";
 
 const STORAGE_KEY = "seo-content-factory-state";
@@ -119,6 +120,7 @@ function generateGbpContent(opts: { businessName: string; mainKeyword: string; l
 }
 
 function App() {
+  const { user, signOut, enabled: authEnabled } = useAuth();
   const saved = loadSaved();
   const restoredFromSave = !!saved;
 
@@ -1366,6 +1368,9 @@ function App() {
           {saveStatus && <span className="sidebar__status">{saveStatus}</span>}
           <button className="sidebar__demo-btn" onClick={handleLoadDemo}>Load Demo</button>
           <button className="sidebar__clear" onClick={() => { handleClearProject(); setDemoMode(false); }}>Clear Project</button>
+          {authEnabled && user && (
+            <button className="sidebar__signout" onClick={() => { signOut(); window.location.href = "/"; }}>Sign Out</button>
+          )}
           <a href="/" className="sidebar__home-link">Home</a>
         </div>
       </aside>
@@ -1389,8 +1394,8 @@ function App() {
             )}
             {wpConnected && <span className="topbar__badge topbar__badge--green">WP Connected</span>}
             <button className="topbar__profile" onClick={() => setActiveTab("settings")} title="Settings">
-              <span className="topbar__profile-avatar">{businessName ? businessName[0].toUpperCase() : "U"}</span>
-              <span className="topbar__profile-name">{businessName || "Settings"}</span>
+              <span className="topbar__profile-avatar">{user?.email ? user.email[0].toUpperCase() : businessName ? businessName[0].toUpperCase() : "U"}</span>
+              <span className="topbar__profile-name">{user?.user_metadata?.full_name || user?.email?.split("@")[0] || businessName || "Settings"}</span>
             </button>
           </div>
         </header>
@@ -1436,6 +1441,15 @@ function App() {
                     <button className="inline-btn" style={{ marginTop: 8 }} onClick={() => setActiveTab("analytics")}>Configure</button>
                   </div>
                 </div>
+                {authEnabled && user && (
+                  <>
+                    <h2 className="settings-section-title">Account</h2>
+                    <div className="settings-grid">
+                      <div className="field"><label>Email</label><input type="text" value={user.email || ""} readOnly style={{ background: "#f8fafc" }} /></div>
+                      <div className="field"><label>User ID</label><input type="text" value={user.id.slice(0, 16) + "..."} readOnly style={{ background: "#f8fafc", fontFamily: "monospace", fontSize: "0.82rem" }} /></div>
+                    </div>
+                  </>
+                )}
                 <h2 className="settings-section-title">Plan</h2>
                 <div className="settings-plan-card">
                   <div className="settings-plan-name">Free Plan</div>
