@@ -351,7 +351,11 @@ export default function LandingPage() {
         <div className="lp-wrap">
           <div className="lp-footer__inner">
             <div className="lp-footer__brand">SEO Rank Writer</div>
-            <div className="lp-footer__text">Generate. Publish. Rank.</div>
+            <div className="lp-footer__links">
+              <a href="/privacy">Privacy Policy</a>
+              <a href="/terms">Terms of Service</a>
+              <span>Generate. Publish. Rank.</span>
+            </div>
           </div>
         </div>
       </footer>

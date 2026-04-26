@@ -10,6 +10,8 @@ import BacklinkChecker from './pages/BacklinkChecker.tsx'
 import SeoReport from './pages/SeoReport.tsx'
 import LoginPage from './pages/LoginPage.tsx'
 import SignupPage from './pages/SignupPage.tsx'
+import PrivacyPolicy from './pages/PrivacyPolicy.tsx'
+import TermsOfService from './pages/TermsOfService.tsx'
 
 function Router() {
   const [path, setPath] = useState(window.location.pathname)
@@ -76,6 +78,8 @@ function Router() {
   if (path === '/plugins') return <PluginDownloads />
   if (path === '/backlinks') return <BacklinkChecker />
   if (path === '/report') return <SeoReport />
+  if (path === '/privacy') return <PrivacyPolicy />
+  if (path === '/terms') return <TermsOfService />
 
   return <LandingPage />
 }
