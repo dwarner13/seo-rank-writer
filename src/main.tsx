@@ -56,13 +56,13 @@ function Router() {
   }, [loading, enabled, user, path, navigate])
 
   // OAuth callback route — handle BEFORE loading check
-  // This page does the code exchange itself and redirects to /app
   if (path === '/auth/callback') {
     return <AuthCallback onComplete={() => navigate('/app')} />
   }
 
   // Show loading spinner while auth is being checked
   if (loading) {
+    console.log("[Route] Auth still loading, showing spinner. path:", path)
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#64748b', gap: 12 }}>
         <img src="/logo.png" alt="SEO Rank Writer" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain' as const }} />
@@ -73,8 +73,9 @@ function Router() {
 
   // Protected route: /app requires auth (when Supabase is enabled)
   if (path === '/app') {
+    console.log("[Route] /app — enabled:", enabled, "user:", user?.email || "none")
     if (enabled && !user) {
-      console.log("[Auth] No session for /app, redirecting to /login")
+      console.log("[Route] No session for /app, redirecting to /login")
       window.history.replaceState({}, '', '/login')
       return <LoginPage onNavigate={navigate} />
     }
@@ -83,12 +84,17 @@ function Router() {
 
   // Auth pages — already logged in? go to app
   if (path === '/login') {
-    if (enabled && user) return null // useEffect above handles redirect
+    console.log("[Route] /login — enabled:", enabled, "user:", user?.email || "none")
+    if (enabled && user) {
+      console.log("[Route] User already signed in, redirecting to /app")
+      navigate('/app')
+      return null
+    }
     return <LoginPage onNavigate={navigate} />
   }
 
   if (path === '/signup') {
-    if (enabled && user) return null
+    if (enabled && user) { navigate('/app'); return null }
     return <SignupPage onNavigate={navigate} />
   }
 

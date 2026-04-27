@@ -51,8 +51,10 @@ export default function AuthCallback({ onComplete }: { onComplete: () => void })
 
           if (data?.session) {
             console.log("[AuthCallback] Session obtained:", data.session.user.email);
+            // Verify session is persisted before redirect
+            const { data: verify } = await supabase!.auth.getSession();
+            console.log("[AuthCallback] Session verified:", verify.session?.user.email || "NOT PERSISTED");
             setStatus("Signed in! Redirecting...");
-            // Use replace so back button doesn't return to callback
             window.location.replace("/app");
             return;
           }

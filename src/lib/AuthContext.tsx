@@ -37,24 +37,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // 1. Restore session from localStorage
+    // Step 1: Listen for auth changes (login, logout, token refresh)
+    // This must be registered before getSession to avoid missing events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      console.log("[Auth] onAuthStateChange:", event, s?.user?.email || "(no user)");
+      // Always update session/user state from auth events
+      setSession(s);
+      setUser(s?.user ?? null);
+    });
+
+    // Step 2: Get stored session — this is the ONLY place that sets loading=false
     console.log("[Auth] Checking stored session...");
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      console.log("[Auth] getSession:", s?.user?.email || "no session");
+      console.log("[Auth] getSession result:", s?.user?.email || "no session");
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);
-    });
-
-    // 2. Listen for future auth changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
-      console.log("[Auth] onAuthStateChange:", event, s?.user?.email || "(no user)");
-      setSession(s);
-      setUser(s?.user ?? null);
-      // If someone signs in after initial load (e.g. email/password login)
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-        setLoading(false);
-      }
     });
 
     return () => subscription.unsubscribe();
