@@ -19,12 +19,18 @@ export default function AuthCallback({ onComplete }: { onComplete: () => void })
     const errorDesc = url.searchParams.get("error_description") || hashParams.get("error_description");
 
     console.log("[AuthCallback] Starting callback");
+    console.log("[AuthCallback] Full URL:", window.location.href);
     console.log("[AuthCallback] code:", code ? "present" : "none");
     console.log("[AuthCallback] access_token:", accessToken ? "present" : "none");
     console.log("[AuthCallback] error:", errorParam || "none");
+    console.log("[AuthCallback] error_description:", errorDesc || "none");
 
     if (errorParam) {
-      setError(errorDesc || errorParam || "OAuth error");
+      const fullError = errorDesc
+        ? `${errorParam}: ${decodeURIComponent(errorDesc)}`
+        : errorParam;
+      console.error("[AuthCallback] OAuth error:", fullError);
+      setError(fullError);
       return;
     }
 
