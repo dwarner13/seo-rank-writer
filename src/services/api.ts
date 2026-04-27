@@ -4,13 +4,17 @@ import type { GeneratedContent, GenerateOptions, PageType } from "../types";
  * Try Express server first (local dev via Vite proxy), fall back to Netlify function (production).
  */
 async function apiFetch(expressPath: string, netlifyFunc: string, options: RequestInit): Promise<Response> {
-  let res = await fetch(expressPath, options).catch(() => null);
-  if (res && res.ok) return res;
-  // If Express returned an error body (not a 404/network fail), use it
-  if (res && res.status >= 400 && res.status < 500) return res;
+  // Try Express server (local dev). On Netlify, /api/* returns HTML 404 page.
+  try {
+    const res = await fetch(expressPath, options);
+    // If Express is running and returned a real JSON response, use it
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) return res;
+  } catch {
+    // Network error — Express not running
+  }
   // Fall back to Netlify function
-  res = await fetch(`/.netlify/functions/${netlifyFunc}`, options);
-  return res;
+  return fetch(`/.netlify/functions/${netlifyFunc}`, options);
 }
 
 function postJson(body: unknown): RequestInit {
