@@ -52,22 +52,40 @@ function saveSettings(s: AppSettings) {
 
 type Tab = "dashboard" | "article" | "metadata" | "schema" | "social" | "gbp" | "media" | "mediagen" | "score" | "wordpress" | "analytics" | "settings" | "account" | "insights" | "keywords";
 
-const SIDEBAR_ITEMS: { key: Tab; label: string; icon: string }[] = [
-  { key: "dashboard", label: "Dashboard", icon: "\u2302" },
-  { key: "keywords", label: "Keyword Research", icon: "\uD83D\uDD0D" },
-  { key: "article", label: "SEO Article", icon: "\uD83D\uDCDD" },
-  { key: "metadata", label: "Metadata", icon: "\uD83C\uDFF7\uFE0F" },
-  { key: "schema", label: "Schema", icon: "\u007B\u007D" },
-  { key: "social", label: "Social Posts", icon: "\uD83D\uDCF1" },
-  { key: "gbp", label: "GBP Posts", icon: "\uD83D\uDCCD" },
-  { key: "mediagen", label: "Media Engine", icon: "\uD83C\uDFA5" },
-  { key: "insights", label: "Insights", icon: "\uD83D\uDCC8" },
-  { key: "analytics", label: "SEO Analytics", icon: "\uD83D\uDCCA" },
-  { key: "wordpress", label: "WordPress", icon: "\uD83C\uDF10" },
-  { key: "score", label: "SEO Score", icon: "\u2713" },
-  { key: "settings", label: "Project Settings", icon: "\u2699" },
-  { key: "account", label: "Account", icon: "\uD83D\uDC64" },
+interface SidebarSection { label?: string; items: { key: Tab; label: string; icon: string }[] }
+
+const SIDEBAR_SECTIONS: SidebarSection[] = [
+  { items: [
+    { key: "dashboard", label: "Dashboard", icon: "\u2302" },
+  ]},
+  { label: "Create", items: [
+    { key: "keywords", label: "Keyword Research", icon: "\uD83D\uDD0D" },
+    { key: "article", label: "SEO Article", icon: "\uD83D\uDCDD" },
+  ]},
+  { label: "SEO Tools", items: [
+    { key: "metadata", label: "Metadata", icon: "\uD83C\uDFF7\uFE0F" },
+    { key: "schema", label: "Schema", icon: "\u007B\u007D" },
+    { key: "score", label: "SEO Score", icon: "\u2713" },
+  ]},
+  { label: "Marketing", items: [
+    { key: "social", label: "Social Posts", icon: "\uD83D\uDCF1" },
+    { key: "gbp", label: "GBP Posts", icon: "\uD83D\uDCCD" },
+    { key: "mediagen", label: "Media Engine", icon: "\uD83C\uDFA5" },
+  ]},
+  { label: "Publish", items: [
+    { key: "wordpress", label: "WordPress", icon: "\uD83C\uDF10" },
+  ]},
+  { label: "Analytics", items: [
+    { key: "insights", label: "Insights", icon: "\uD83D\uDCC8" },
+    { key: "analytics", label: "SEO Analytics", icon: "\uD83D\uDCCA" },
+  ]},
+  { items: [
+    { key: "settings", label: "Project Settings", icon: "\u2699" },
+    { key: "account", label: "Account", icon: "\uD83D\uDC64" },
+  ]},
 ];
+
+const SIDEBAR_ITEMS = SIDEBAR_SECTIONS.flatMap(s => s.items);
 
 // Keep old TABS for backward compat
 const TABS = SIDEBAR_ITEMS.filter(s => s.key !== "dashboard");
@@ -209,6 +227,24 @@ function App() {
     const kw = localStorage.getItem("seo_selected_keyword");
     return kw || "";
   });
+  // Save article context for tool pages
+  const saveArticleContext = useCallback(() => {
+    if (!result) return;
+    localStorage.setItem("seo_generated_article", result.article || "");
+    localStorage.setItem("seo_generated_title", result.metaTitle || "");
+    localStorage.setItem("seo_generated_keyword", mainKeyword || "");
+    localStorage.setItem("seo_generated_location", location || "");
+    localStorage.setItem("seo_generated_business_name", businessName || "");
+    localStorage.setItem("seo_generated_website_url", websiteUrl || "");
+  }, [result, mainKeyword, location, businessName, websiteUrl]);
+
+  const hasArticleContext = !!result;
+
+  const navigateToTool = useCallback((tab: Tab) => {
+    if (result) saveArticleContext();
+    setActiveTab(tab);
+  }, [result, saveArticleContext]);
+
   const [error, setError] = useState("");
   const [kwLoading, setKwLoading] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
@@ -949,69 +985,18 @@ function App() {
                 </table>
               </div>
             )}
-          </div>
-        );
 
-      case "metadata":
-        return (
-          <div className="tab-content">
-            <div className="cards-grid">
-              <OutputCard title="Meta Title" content={result.metaTitle} accent="#059669"
-                onRegenerate={() => handleRegen("metaTitle", result.metaTitle)} regenerating={regenField === "metaTitle"} />
-              <OutputCard title="Meta Description" content={result.metaDescription} accent="#059669"
-                onRegenerate={() => handleRegen("metaDescription", result.metaDescription)} regenerating={regenField === "metaDescription"} />
-              <OutputCard title="Focus Keyword" content={result.focusKeyword} accent="#059669"
-                onRegenerate={() => handleRegen("focusKeyword", result.focusKeyword)} regenerating={regenField === "focusKeyword"} />
-              <OutputCard title="URL Slug" content={result.urlSlug} accent="#059669"
-                onRegenerate={() => handleRegen("urlSlug", result.urlSlug)} regenerating={regenField === "urlSlug"} />
-            </div>
-            <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
-              <OutputCard title="Keyword Suggestions" content={result.keywordSuggestions.join("\n")} accent="#059669"
-                onRegenerate={() => handleRegen("keywordSuggestions", result.keywordSuggestions.join("\n"))} regenerating={regenField === "keywordSuggestions"} />
-            </div>
-          </div>
-        );
-
-      case "schema":
-        return (
-          <div className="tab-content">
-            <OutputCard title="Schema JSON-LD" content={result.schema} accent="#7c3aed"
-              onRegenerate={() => handleRegen("schema", result.schema)} regenerating={regenField === "schema"} />
-          </div>
-        );
-
-      case "social":
-        return (
-          <div className="tab-content">
-            <div className="cards-grid">
-              <OutputCard title="Facebook Post" content={result.facebook} accent="#1877F2"
-                onRegenerate={() => handleRegen("facebook", result.facebook)} regenerating={regenField === "facebook"} />
-              <OutputCard title="Instagram Caption" content={result.instagram} accent="#E4405F"
-                onRegenerate={() => handleRegen("instagram", result.instagram)} regenerating={regenField === "instagram"} />
-              <OutputCard title="LinkedIn Post" content={result.linkedin} accent="#0A66C2"
-                onRegenerate={() => handleRegen("linkedin", result.linkedin)} regenerating={regenField === "linkedin"} />
-              <OutputCard title="TikTok / Reel Script" content={result.tiktokScript} accent="#000000"
-                onRegenerate={() => handleRegen("tiktokScript", result.tiktokScript)} regenerating={regenField === "tiktokScript"} />
-            </div>
-            <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
-              <OutputCard title="Hashtags" content={result.hashtags.join("  ")} accent="#6C63FF"
-                onRegenerate={() => handleRegen("hashtags", result.hashtags.join("  "))} regenerating={regenField === "hashtags"} />
-            </div>
-          </div>
-        );
-
-      case "gbp":
-        return (
-          <div className="tab-content">
-            <div className="gbp-notice">These are locally generated drafts. API generation coming soon.</div>
-            <div className="cards-grid">
-              <OutputCard title="Update Post" content={result.gbpUpdate} accent="#4285F4" />
-              <OutputCard title="Offer Post" content={result.gbpOffer} accent="#34A853" />
-              <OutputCard title="CTA Post" content={result.gbpCta} accent="#EA4335" />
-              <OutputCard title="Suggested Image Prompt" content={result.gbpImagePrompt} accent="#FBBC05" />
-            </div>
-            <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
-              <OutputCard title="Suggested Button Text" content={result.gbpButtonText} accent="#4285F4" />
+            {/* After Article Toolkit */}
+            <div className="article-toolkit">
+              <h4 className="article-toolkit__title">What would you like to create next?</h4>
+              <div className="article-toolkit__grid">
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("metadata")}>{"\uD83C\uDFF7\uFE0F"} Generate Metadata</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("schema")}>{"\u007B\u007D"} Generate Schema</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("social")}>{"\uD83D\uDCF1"} Create Social Posts</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("gbp")}>{"\uD83D\uDCCD"} Create GBP Posts</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("mediagen")}>{"\uD83C\uDFA5"} Generate Media</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("wordpress")}>{"\uD83C\uDF10"} Send to WordPress</button>
+              </div>
             </div>
           </div>
         );
@@ -1422,6 +1407,35 @@ function App() {
     wpOk: seoScore.categories.wp.items[2]?.pass || false,
   };
 
+  // Standalone tool page wrapper
+  const renderToolPage = (title: string, icon: string, children: React.ReactNode) => (
+    <div className="tool-page">
+      <div className="tool-wrap">
+        {hasArticleContext ? (
+          <div className="tool-context-banner">
+            <div className="tool-context-info">
+              <span className="tool-context-icon">{"\u2713"}</span>
+              <span>Loaded from SEO Article: <strong>{result?.metaTitle || mainKeyword}</strong></span>
+            </div>
+            <div className="tool-context-actions">
+              <button className="kw-btn" onClick={() => { localStorage.removeItem("seo_generated_article"); setActiveTab("article"); }}>Back to Article</button>
+            </div>
+          </div>
+        ) : (
+          <div className="tool-empty-state">
+            <div className="tool-empty-icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>Generate an SEO article first, then come back to create {title.toLowerCase()}.</p>
+            <div className="tool-empty-actions">
+              <button className="kw-btn kw-btn--primary" onClick={() => setActiveTab("article")}>Go to SEO Article</button>
+            </div>
+          </div>
+        )}
+        {hasArticleContext && children}
+      </div>
+    </div>
+  );
+
   const renderDashboardHome = () => (
     <div className="dash-home">
       <div className="dash-welcome">
@@ -1585,15 +1599,20 @@ function App() {
           </div>
         </div>
         <nav className="sidebar__nav">
-          {SIDEBAR_ITEMS.map((item) => (
-            <button
-              key={item.key}
-              className={`sidebar__item ${activeTab === item.key ? "sidebar__item--active" : ""}`}
-              onClick={() => { setActiveTab(item.key); setMobileMenuOpen(false); }}
-            >
-              <span className="sidebar__item-icon">{item.icon}</span>
-              <span className="sidebar__item-label">{item.label}</span>
-            </button>
+          {SIDEBAR_SECTIONS.map((section, si) => (
+            <div key={si} className="sidebar__section">
+              {section.label && <div className="sidebar__section-label">{section.label}</div>}
+              {section.items.map((item) => (
+                <button
+                  key={item.key}
+                  className={`sidebar__item ${activeTab === item.key ? "sidebar__item--active" : ""}`}
+                  onClick={() => { setActiveTab(item.key); setMobileMenuOpen(false); }}
+                >
+                  <span className="sidebar__item-icon">{item.icon}</span>
+                  <span className="sidebar__item-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="sidebar__footer">
@@ -1762,6 +1781,91 @@ function App() {
                 </div>
               </div>
             </div>
+          ) : activeTab === "metadata" ? (
+            renderToolPage("Metadata", "\uD83C\uDFF7\uFE0F", result && (
+              <div className="tool-results">
+                <h2 className="tool-section-title">SEO Metadata</h2>
+                <div className="cards-grid">
+                  <OutputCard title="Meta Title" content={result.metaTitle} accent="#059669"
+                    onRegenerate={() => handleRegen("metaTitle", result.metaTitle)} regenerating={regenField === "metaTitle"} />
+                  <OutputCard title="Meta Description" content={result.metaDescription} accent="#059669"
+                    onRegenerate={() => handleRegen("metaDescription", result.metaDescription)} regenerating={regenField === "metaDescription"} />
+                  <OutputCard title="Focus Keyword" content={result.focusKeyword} accent="#059669"
+                    onRegenerate={() => handleRegen("focusKeyword", result.focusKeyword)} regenerating={regenField === "focusKeyword"} />
+                  <OutputCard title="URL Slug" content={result.urlSlug} accent="#059669"
+                    onRegenerate={() => handleRegen("urlSlug", result.urlSlug)} regenerating={regenField === "urlSlug"} />
+                </div>
+                <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
+                  <OutputCard title="Keyword Suggestions" content={result.keywordSuggestions.join("\n")} accent="#059669"
+                    onRegenerate={() => handleRegen("keywordSuggestions", result.keywordSuggestions.join("\n"))} regenerating={regenField === "keywordSuggestions"} />
+                </div>
+                <div className="tool-next">
+                  <span>Next:</span>
+                  <button className="kw-btn" onClick={() => navigateToTool("schema")}>Generate Schema</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("social")}>Create Social Posts</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("wordpress")}>Send to WordPress</button>
+                </div>
+              </div>
+            ))
+          ) : activeTab === "schema" ? (
+            renderToolPage("Schema", "\u007B\u007D", result && (
+              <div className="tool-results">
+                <h2 className="tool-section-title">Schema JSON-LD</h2>
+                <OutputCard title="Schema Markup" content={result.schema} accent="#7c3aed"
+                  onRegenerate={() => handleRegen("schema", result.schema)} regenerating={regenField === "schema"} />
+                <div className="tool-next">
+                  <span>Next:</span>
+                  <button className="kw-btn" onClick={() => navigateToTool("social")}>Create Social Posts</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("wordpress")}>Send to WordPress</button>
+                </div>
+              </div>
+            ))
+          ) : activeTab === "social" ? (
+            renderToolPage("Social Posts", "\uD83D\uDCF1", result && (
+              <div className="tool-results">
+                <h2 className="tool-section-title">Social Media Posts</h2>
+                <div className="cards-grid">
+                  <OutputCard title="Facebook Post" content={result.facebook} accent="#1877F2"
+                    onRegenerate={() => handleRegen("facebook", result.facebook)} regenerating={regenField === "facebook"} />
+                  <OutputCard title="Instagram Caption" content={result.instagram} accent="#E4405F"
+                    onRegenerate={() => handleRegen("instagram", result.instagram)} regenerating={regenField === "instagram"} />
+                  <OutputCard title="LinkedIn Post" content={result.linkedin} accent="#0A66C2"
+                    onRegenerate={() => handleRegen("linkedin", result.linkedin)} regenerating={regenField === "linkedin"} />
+                  <OutputCard title="TikTok / Reel Script" content={result.tiktokScript} accent="#000000"
+                    onRegenerate={() => handleRegen("tiktokScript", result.tiktokScript)} regenerating={regenField === "tiktokScript"} />
+                </div>
+                <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
+                  <OutputCard title="Hashtags" content={result.hashtags.join("  ")} accent="#6C63FF"
+                    onRegenerate={() => handleRegen("hashtags", result.hashtags.join("  "))} regenerating={regenField === "hashtags"} />
+                </div>
+                <div className="tool-next">
+                  <span>Next:</span>
+                  <button className="kw-btn" onClick={() => navigateToTool("gbp")}>Create GBP Posts</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("mediagen")}>Generate Media</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("wordpress")}>Send to WordPress</button>
+                </div>
+              </div>
+            ))
+          ) : activeTab === "gbp" ? (
+            renderToolPage("GBP Posts", "\uD83D\uDCCD", result && (
+              <div className="tool-results">
+                <h2 className="tool-section-title">Google Business Profile Posts</h2>
+                <div className="cards-grid">
+                  <OutputCard title="Update Post" content={result.gbpUpdate} accent="#4285F4" />
+                  <OutputCard title="Offer Post" content={result.gbpOffer} accent="#34A853" />
+                  <OutputCard title="CTA Post" content={result.gbpCta} accent="#EA4335" />
+                  <OutputCard title="Suggested Image Prompt" content={result.gbpImagePrompt} accent="#FBBC05" />
+                </div>
+                <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
+                  <OutputCard title="Suggested Button Text" content={result.gbpButtonText} accent="#4285F4" />
+                </div>
+                <div className="tool-next">
+                  <span>Next:</span>
+                  <button className="kw-btn" onClick={() => navigateToTool("mediagen")}>Generate Media</button>
+                  <button className="kw-btn" onClick={() => navigateToTool("wordpress")}>Send to WordPress</button>
+                </div>
+              </div>
+            ))
           ) : activeTab === "insights" ? (
             <div className="insights-page">
               <div className="insights-wrap">
