@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage.tsx'
 import SignupPage from './pages/SignupPage.tsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.tsx'
 import TermsOfService from './pages/TermsOfService.tsx'
+import AuthCallback from './pages/AuthCallback.tsx'
 
 function Router() {
   const [path, setPath] = useState(window.location.pathname)
@@ -53,6 +54,12 @@ function Router() {
       }
     }
   }, [loading, enabled, user, path, navigate])
+
+  // OAuth callback route — handle BEFORE loading check
+  // This page does the code exchange itself and redirects to /app
+  if (path === '/auth/callback') {
+    return <AuthCallback onComplete={() => navigate('/app')} />
+  }
 
   // Show loading spinner while auth is being checked
   if (loading) {
