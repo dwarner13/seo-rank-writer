@@ -205,6 +205,10 @@ function App() {
     return r;
   });
   const [loading, setLoading] = useState(false);
+  const [kwBanner, setKwBanner] = useState(() => {
+    const kw = localStorage.getItem("seo_selected_keyword");
+    return kw || "";
+  });
   const [error, setError] = useState("");
   const [kwLoading, setKwLoading] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
@@ -1637,9 +1641,12 @@ function App() {
               businessName={businessName}
               location={location}
               mainKeyword={mainKeyword}
-              onUseKeyword={(kw, loc) => {
+              websiteUrl={websiteUrl}
+              onUseKeyword={(kw, loc, pt) => {
                 setMainKeyword(kw);
                 if (loc) setLocation(loc);
+                if (pt) setPageType(pt as PageType);
+                setKwBanner(kw);
                 setActiveTab("article");
               }}
             />
@@ -1957,6 +1964,13 @@ function App() {
           </div>
 
           <div className="sticky-generate">
+            {kwBanner && (
+              <div className="kw-banner">
+                <div className="kw-banner-text">Keyword loaded: <strong>{kwBanner}</strong></div>
+                <div className="kw-banner-hint">Click Generate SEO Content to create an article for this keyword.</div>
+                <button className="kw-banner-close" onClick={() => { setKwBanner(""); localStorage.removeItem("seo_selected_keyword"); }}>&times;</button>
+              </div>
+            )}
             {authEnabled && user && (
               <div className="usage-indicator">
                 <span className="usage-text">{generationsUsed} / {generationLimit} articles this month</span>
