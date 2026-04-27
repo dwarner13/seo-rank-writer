@@ -23,42 +23,43 @@ const handler: Handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: "Provide a business type or seed keyword." }) };
   }
 
-  const prompt = `You are an expert local SEO strategist. Generate keyword research for:
+  const systemPrompt = `You are a professional SEO strategist who generates ONLY realistic Google search keywords.
 
-Business Type: ${businessType || "local service business"}
+CRITICAL RULES:
+- Every keyword must sound like something a REAL person would type into Google
+- Do NOT force the location name into every keyword — only add location where it sounds natural
+- Do NOT create awkward word combinations just to include a neighborhood name
+- Use the CITY name more than the neighborhood name
+- "near me" keywords should NOT include a specific location
+- Start from real base search patterns, then add natural modifiers
+- Think about what someone with a phone in their hand would actually type
+
+GOOD examples: "cash for cars Vancouver", "sell my car for cash near me", "how much is my junk car worth"
+BAD examples: "cash for cars Ironwood Vancouver BC area", "how fast cash for cars Ironwood"`;
+
+  const userPrompt = `Generate keyword research for:
+
+Business: ${businessType || "local service business"}
 Location: ${location || "general"}
-${websiteUrl ? `Website: ${websiteUrl}` : ""}
 ${seedKeyword ? `Seed Keyword: ${seedKeyword}` : ""}
+${websiteUrl ? `Website: ${websiteUrl}` : ""}
 
-Return ONLY valid JSON, no markdown fences, no explanation. Use this exact structure:
+Step 1: Identify 5-8 realistic BASE keywords people search for this business type.
+Step 2: Add natural modifiers: city name, "near me", "same day", "free", "best", etc.
+Step 3: Generate keywords that pass the "would a real person type this?" test.
 
+Return ONLY valid JSON, no markdown fences:
 {
-  "topMoneyKeywords": [5 high buyer-intent keywords],
-  "longTailKeywords": [5 easier-to-rank long-tail phrases],
-  "questionKeywords": [5 question-based keywords for FAQ/blog],
-  "localSeoKeywords": [5 location-specific keywords with city/neighborhood/near me],
-  "contentIdeas": [5 article/page title suggestions]
+  "topMoneyKeywords": [5 — high buyer intent, ready to buy NOW],
+  "longTailKeywords": [5 — 4-7 words, specific situations],
+  "questionKeywords": [5 — start with how/what/where/can/do/is],
+  "localSeoKeywords": [5 — city name used naturally, "near me" variants],
+  "contentIdeas": [5 — compelling blog/article titles targeting real searches]
 }
 
-Each keyword object must be:
-{
-  "keyword": "string",
-  "intent": "Commercial" | "Local" | "Informational" | "Transactional",
-  "difficulty": "Easy" | "Medium" | "Hard",
-  "priorityScore": number 1-100,
-  "pageType": "Service Page" | "Blog Post" | "Location Page" | "FAQ" | "GBP Post",
-  "reason": "brief reason this keyword matters"
-}
+Each item: { "keyword": "the search phrase", "intent": "Commercial|Local|Informational|Transactional", "difficulty": "Easy|Medium|Hard", "priorityScore": 1-100, "pageType": "Service Page|Blog Post|Location Page|FAQ|GBP Post", "reason": "why this keyword matters" }
 
-Rules:
-- All keywords must be specific to the business type and location
-- Money keywords should have high commercial/transactional intent
-- Long-tail keywords should be 4-7 words, easier to rank
-- Question keywords should start with how, what, why, when, where, which, can, do, is
-- Local keywords must include the city/area name or "near me"
-- Content ideas should be compelling article titles
-- Priority scores: money keywords 80-100, local 70-90, long-tail 50-75, questions 40-65
-- Each group must have exactly 5 items`;
+Priority: money 85-98, local 70-90, long-tail 55-75, questions 40-65. Each group exactly 5 items.`;
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -71,7 +72,8 @@ Rules:
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4096,
-        messages: [{ role: "user", content: prompt }],
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
       }),
     });
 

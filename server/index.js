@@ -1627,27 +1627,56 @@ app.post("/api/keyword-research", async (req, res) => {
     const message = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
+      system: `You are a professional SEO strategist who generates ONLY realistic Google search keywords.
+
+CRITICAL RULES:
+- Every keyword must sound like something a REAL person would type into Google
+- Do NOT force the location name into every keyword — only add location where it sounds natural
+- Do NOT create awkward word combinations just to include a neighborhood name
+- Use the CITY name (e.g. "Vancouver") more than the neighborhood name
+- "near me" keywords should NOT include a specific location (that defeats the purpose)
+- Start from real base search patterns, then add natural modifiers
+- Think about what someone with a phone in their hand would actually type
+
+GOOD examples (cash for cars, Vancouver):
+- "cash for cars Vancouver"
+- "sell my car for cash near me"
+- "junk car removal Vancouver"
+- "how much is my junk car worth"
+- "who buys cars without title Vancouver"
+- "scrap car pickup same day"
+
+BAD examples (DO NOT generate these):
+- "cash for cars Ironwood Vancouver BC area" (too many location qualifiers)
+- "how fast cash for cars Ironwood" (nobody searches this)
+- "instant cash for cars Ironwood" (forced neighborhood insertion)
+- "sell old car cash Ironwood Vancouver" (awkward phrasing)`,
       messages: [{
         role: "user",
-        content: `You are an expert local SEO strategist. Generate keyword research for:
+        content: `Generate keyword research for:
 
-Business Type: ${businessType || "local service business"}
+Business: ${businessType || "local service business"}
 Location: ${location || "general"}
-${websiteUrl ? `Website: ${websiteUrl}` : ""}
 ${seedKeyword ? `Seed Keyword: ${seedKeyword}` : ""}
+${websiteUrl ? `Website: ${websiteUrl}` : ""}
 
-Return ONLY valid JSON, no markdown fences. Structure:
+Step 1: Identify 5-8 realistic BASE keywords people search for this business type.
+Step 2: Add natural modifiers: city name, "near me", "same day", "free", "best", "how much", etc.
+Step 3: Generate keywords that pass the "would a real person type this?" test.
+
+Return ONLY valid JSON, no markdown fences:
 {
-  "topMoneyKeywords": [5 high buyer-intent keywords],
-  "longTailKeywords": [5 easier-to-rank long-tail phrases],
-  "questionKeywords": [5 question-based keywords for FAQ/blog],
-  "localSeoKeywords": [5 location-specific keywords],
-  "contentIdeas": [5 article/page title suggestions]
+  "topMoneyKeywords": [5 items — high buyer intent, someone ready to buy/hire NOW],
+  "longTailKeywords": [5 items — 4-7 word phrases, specific situations, easier to rank],
+  "questionKeywords": [5 items — start with how/what/where/can/do/is, real questions people ask],
+  "localSeoKeywords": [5 items — city/area name used naturally, "near me" variants],
+  "contentIdeas": [5 items — compelling blog/article titles that target real searches]
 }
 
-Each keyword: { "keyword": "string", "intent": "Commercial|Local|Informational|Transactional", "difficulty": "Easy|Medium|Hard", "priorityScore": 1-100, "pageType": "Service Page|Blog Post|Location Page|FAQ|GBP Post", "reason": "brief reason" }
+Each item: { "keyword": "the search phrase", "intent": "Commercial|Local|Informational|Transactional", "difficulty": "Easy|Medium|Hard", "priorityScore": 1-100, "pageType": "Service Page|Blog Post|Location Page|FAQ|GBP Post", "reason": "why this keyword matters" }
 
-Rules: money keywords 80-100 priority, local 70-90, long-tail 50-75, questions 40-65. Each group exactly 5 items.`,
+Priority ranges: money 85-98, local 70-90, long-tail 55-75, questions 40-65, content 50-70.
+Each group must have exactly 5 items. Only the location keywords should consistently include the city name.`,
       }],
     });
 
