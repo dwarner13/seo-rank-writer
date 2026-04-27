@@ -44,11 +44,23 @@ function Router() {
     return () => document.removeEventListener('click', onClick)
   }, [navigate])
 
-  // Auth loading state
+  // After login completes, if we're on /login or /signup and now have user, redirect to /app
+  useEffect(() => {
+    if (!loading && enabled && user) {
+      if (path === '/login' || path === '/signup') {
+        console.log("[Auth] Redirecting authenticated user to /app")
+        navigate('/app')
+      }
+    }
+  }, [loading, enabled, user, path, navigate])
+
+  // Show loading spinner while auth is being checked
+  // This prevents the flash-redirect-to-login on OAuth callbacks
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#64748b' }}>
-        Loading...
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#64748b', gap: 12 }}>
+        <img src="/logo.png" alt="SEO Rank Writer" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain' }} />
+        <span>Loading...</span>
       </div>
     )
   }
@@ -56,21 +68,21 @@ function Router() {
   // Protected route: /app requires auth (when Supabase is enabled)
   if (path === '/app') {
     if (enabled && !user) {
-      // Redirect to login
+      console.log("[Auth] No session for /app, redirecting to /login")
       window.history.replaceState({}, '', '/login')
       return <LoginPage onNavigate={navigate} />
     }
     return <App />
   }
 
-  // Auth pages
+  // Auth pages — already logged in? go to app
   if (path === '/login') {
-    if (enabled && user) { navigate('/app'); return null }
+    if (enabled && user) return null // useEffect above handles redirect
     return <LoginPage onNavigate={navigate} />
   }
 
   if (path === '/signup') {
-    if (enabled && user) { navigate('/app'); return null }
+    if (enabled && user) return null
     return <SignupPage onNavigate={navigate} />
   }
 
