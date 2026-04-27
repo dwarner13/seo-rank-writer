@@ -215,79 +215,104 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Service Offer ── */}
-      <section className="lp-section lp-section--light">
-        <div className="lp-wrap">
-          <div className="lp-section__label">Done for You</div>
-          <h2 className="lp-section__h2">We'll Build Your Pages</h2>
-          <p className="lp-section__intro">
-            Not every business owner has time to run a tool. We'll generate, optimize, and publish SEO pages to your WordPress site.
-          </p>
-          <div className="lp-services">
-            {[
-              { name: "Single Page", price: "$150", desc: "One fully optimized SEO page with meta fields, schema, and internal links." },
-              { name: "5-Page Package", price: "$600", per: "$120/page", desc: "Five pages with internal linking strategy connecting all pages together.", popular: false },
-              { name: "10-Page Package", price: "$1,000", per: "$100/page", desc: "Ten pages with full linking, schema, social content, and GBP posts.", popular: true },
-              { name: "Monthly Retainer", price: "$800/mo", desc: "Four new pages/month, ongoing linking, Search Console reporting, content refreshes." },
-            ].map((s, i) => (
-              <div key={i} className={`lp-service-card${s.popular ? " lp-service-card--popular" : ""}`}>
-                {s.popular && <div className="lp-service-card__badge">Most Popular</div>}
-                <h3 className="lp-service-card__name">{s.name}</h3>
-                <div className="lp-service-card__price">{s.price}</div>
-                {s.per && <div className="lp-service-card__per">{s.per}</div>}
-                <p className="lp-service-card__desc">{s.desc}</p>
-                <a href="#" className="lp-btn lp-btn--sm">Get a Quote</a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SaaS Pricing ── */}
+      {/* ── Pricing ── */}
       <section className="lp-section" id="pricing">
         <div className="lp-wrap">
-          <div className="lp-section__label">SaaS Pricing</div>
-          <h2 className="lp-section__h2">Or Use the Tool Yourself</h2>
-          <div className="lp-pricing">
+          <div className="lp-section__label">Pricing</div>
+          <h2 className="lp-section__h2">Scale Your Rankings. Pick Your Plan.</h2>
+          <p className="lp-section__intro">
+            Every plan includes AI-powered SEO content, schema markup, and internal linking. Upgrade when you're ready to dominate.
+          </p>
+
+          <div className="lp-pricing lp-pricing--3col">
+            {/* Starter */}
             <div className="lp-price-card">
-              <h3 className="lp-price-card__name">Free</h3>
+              <h3 className="lp-price-card__name">Starter</h3>
+              <p className="lp-price-card__tagline">Test the waters</p>
               <div className="lp-price-card__price">$0</div>
-              <div className="lp-price-card__period">forever</div>
+              <div className="lp-price-card__period">free forever</div>
               <ul className="lp-price-card__list">
-                <li>3 pages per month</li>
-                <li>SEO content generator</li>
-                <li>Meta tags and schema</li>
+                <li>3 SEO pages per month</li>
+                <li>Meta titles + descriptions</li>
+                <li>Schema JSON-LD</li>
                 <li>CSV export</li>
+                <li>SEO score dashboard</li>
               </ul>
-              <a href="/app" className="lp-btn lp-btn--outline lp-btn--full">Start Free</a>
+              <a href="/signup" className="lp-btn lp-btn--outline lp-btn--full">Get Started</a>
             </div>
+
+            {/* Growth */}
             <div className="lp-price-card lp-price-card--featured">
-              <div className="lp-price-card__badge">Best Value</div>
-              <h3 className="lp-price-card__name">Pro</h3>
-              <div className="lp-price-card__price">$29</div>
+              <div className="lp-price-card__badge">Most Popular</div>
+              <h3 className="lp-price-card__name">Growth</h3>
+              <p className="lp-price-card__tagline">For businesses ready to rank</p>
+              <div className="lp-price-card__price">$39</div>
               <div className="lp-price-card__period">per month</div>
               <ul className="lp-price-card__list">
-                <li>Unlimited pages</li>
-                <li>WordPress publishing</li>
-                <li>Internal linking system</li>
+                <li><strong>50 SEO pages per month</strong></li>
+                <li>WordPress auto-publishing</li>
+                <li>Internal linking engine</li>
                 <li>Search Console analytics</li>
-                <li>Media generator</li>
+                <li>Media engine (images + video)</li>
+                <li>Social content generator</li>
+                <li>GBP post generator</li>
                 <li>Priority support</li>
               </ul>
-              <a href="/app" className="lp-btn lp-btn--primary lp-btn--full">Get Started</a>
+              <a href="/signup" className="lp-btn lp-btn--primary lp-btn--full">Start Growing</a>
             </div>
+
+            {/* Domination */}
             <div className="lp-price-card">
-              <h3 className="lp-price-card__name">Agency</h3>
-              <div className="lp-price-card__price">$79</div>
+              <h3 className="lp-price-card__name">Domination</h3>
+              <p className="lp-price-card__tagline">For agencies &amp; multi-location</p>
+              <div className="lp-price-card__price">$99</div>
               <div className="lp-price-card__period">per month</div>
               <ul className="lp-price-card__list">
-                <li>Everything in Pro</li>
+                <li><strong>Unlimited SEO pages</strong></li>
+                <li>Everything in Growth</li>
                 <li>5 WordPress sites</li>
                 <li>White-label exports</li>
                 <li>Team access (3 seats)</li>
                 <li>Bulk generation queue</li>
+                <li>Backlink analysis</li>
+                <li>Dedicated support</li>
               </ul>
-              <a href="/app" className="lp-btn lp-btn--outline lp-btn--full">Contact Sales</a>
+              <a href="/signup" className="lp-btn lp-btn--outline lp-btn--full">Scale My SEO</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Buy Credits ── */}
+      <section className="lp-section lp-section--light">
+        <div className="lp-wrap">
+          <div className="lp-section__label">Pay Per Page</div>
+          <h2 className="lp-section__h2">Need a Few Pages? Buy Credits.</h2>
+          <p className="lp-section__intro">
+            No subscription needed. Generate SEO-optimized pages on demand — perfect for one-off projects or testing before you commit.
+          </p>
+          <div className="lp-credits">
+            <div className="lp-credit-card">
+              <div className="lp-credit-pages">1 page</div>
+              <div className="lp-credit-price">$9</div>
+              <div className="lp-credit-per">$9.00 / page</div>
+              <p className="lp-credit-desc">Try a single page with full SEO optimization, schema, and meta tags.</p>
+              <a href="/signup" className="lp-btn lp-btn--outline lp-btn--full lp-btn--sm">Buy 1 Page</a>
+            </div>
+            <div className="lp-credit-card">
+              <div className="lp-credit-pages">5 pages</div>
+              <div className="lp-credit-price">$35</div>
+              <div className="lp-credit-per">$7.00 / page</div>
+              <p className="lp-credit-desc">Build out a service area or launch a small content campaign.</p>
+              <a href="/signup" className="lp-btn lp-btn--outline lp-btn--full lp-btn--sm">Buy 5 Pages</a>
+            </div>
+            <div className="lp-credit-card lp-credit-card--best">
+              <div className="lp-credit-badge">Best Value</div>
+              <div className="lp-credit-pages">20 pages</div>
+              <div className="lp-credit-price">$99</div>
+              <div className="lp-credit-per">$4.95 / page</div>
+              <p className="lp-credit-desc">Dominate a city or niche. Internal linking across all 20 pages included.</p>
+              <a href="/signup" className="lp-btn lp-btn--primary lp-btn--full lp-btn--sm">Buy 20 Pages</a>
             </div>
           </div>
         </div>
