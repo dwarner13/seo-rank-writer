@@ -8,8 +8,12 @@ export const supabase = supabaseUrl && supabaseAnonKey
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: "implicit",
+        // IMPORTANT: detectSessionInUrl is OFF.
+        // We handle code exchange manually in /auth/callback.
+        // This prevents the race condition where onAuthStateChange
+        // tries to parse the code before the callback page mounts.
+        detectSessionInUrl: false,
+        flowType: "pkce",
       },
     })
   : null;
