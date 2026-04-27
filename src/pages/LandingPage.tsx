@@ -63,7 +63,7 @@ export default function LandingPage() {
               <div className="lp-browser-dots">
                 <span /><span /><span />
               </div>
-              <ProductImage src="/marketing/dashboard-demo.png" alt="SEO Rank Writer Dashboard" />
+              <ProductImage src="/publicmarketing/dashboard-demo.png" alt="SEO Rank Writer Dashboard" />
             </div>
             <div className="lp-hero-badges">
               <span className="lp-hero-fbadge lp-hero-fbadge--green">SEO Score 72</span>
@@ -132,7 +132,7 @@ export default function LandingPage() {
               <h3 className="lp-hiw-card__title">Generate SEO Content</h3>
               <p className="lp-hiw-card__desc">Enter your keyword and location. AI creates a full article, meta tags, schema, social posts, and media prompts.</p>
               <div className="lp-hiw-card__img">
-                <ProductImage src="/marketing/article-generator-demo.png" alt="SEO Content Generator" />
+                <ProductImage src="/publicmarketing/article-generator-demo.png" alt="SEO Content Generator" />
               </div>
             </div>
             <div className="lp-hiw-card">
@@ -140,7 +140,7 @@ export default function LandingPage() {
               <h3 className="lp-hiw-card__title">Optimize with SEO Score</h3>
               <p className="lp-hiw-card__desc">Real-time scoring across 6 categories: content, metadata, schema, internal links, GSC, and WordPress readiness.</p>
               <div className="lp-hiw-card__img">
-                <ProductImage src="/marketing/dashboard-demo.png" alt="SEO Score Dashboard" />
+                <ProductImage src="/publicmarketing/dashboard-demo.png" alt="SEO Score Dashboard" />
               </div>
             </div>
             <div className="lp-hiw-card">
@@ -148,7 +148,7 @@ export default function LandingPage() {
               <h3 className="lp-hiw-card__title">Publish to WordPress</h3>
               <p className="lp-hiw-card__desc">One click sends your page as a draft with all SEO fields filled — title, description, slug, schema, Open Graph.</p>
               <div className="lp-hiw-card__img">
-                <ProductImage src="/marketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
+                <ProductImage src="/publicmarketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
               </div>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function LandingPage() {
               <a href="/app" className="lp-btn lp-btn--primary" style={{ marginTop: 16 }}>Try Media Engine</a>
             </div>
             <div className="lp-showcase__img">
-              <ProductImage src="/marketing/media-engine-demo.png" alt="Media Engine" />
+              <ProductImage src="/publicmarketing/media-engine-demo.png" alt="Media Engine" />
             </div>
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function LandingPage() {
               <a href="/plugins" className="lp-btn lp-btn--outline" style={{ marginTop: 16 }}>Get the Plugin</a>
             </div>
             <div className="lp-showcase__img">
-              <ProductImage src="/marketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
+              <ProductImage src="/publicmarketing/wordpress-publish-demo.png" alt="WordPress Publishing" />
             </div>
           </div>
         </div>
