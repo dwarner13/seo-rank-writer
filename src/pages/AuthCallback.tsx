@@ -10,50 +10,39 @@ export default function AuthCallback({ onComplete }: { onComplete: () => void })
       return;
     }
 
-    const hash = window.location.hash;
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    console.log("[AuthCallback] URL:", window.location.href);
 
-    console.log("[AuthCallback] Processing...", { hasCode: !!code, hasHash: hash.length > 1 });
+    // With implicit flow, tokens arrive in the URL hash (#access_token=...)
+    // detectSessionInUrl: true means Supabase will auto-parse them.
+    // We just need to wait for the session to be available.
 
-    async function handleCallback() {
-      try {
-        if (code) {
-          // PKCE flow — exchange code for session
-          console.log("[AuthCallback] Exchanging PKCE code...");
-          const { data, error: exchangeError } = await supabase!.auth.exchangeCodeForSession(code);
-          if (exchangeError) {
-            console.error("[AuthCallback] Code exchange failed:", exchangeError.message);
-            setError(exchangeError.message);
-            return;
-          }
-          if (data.session) {
-            console.log("[AuthCallback] Session obtained:", data.session.user.email);
-          }
-        } else if (hash.includes("access_token")) {
-          // Implicit flow — Supabase auto-parses with detectSessionInUrl
-          console.log("[AuthCallback] Implicit flow, waiting for auto-parse...");
-          // Give Supabase a moment to parse the hash
-          await new Promise(r => setTimeout(r, 500));
-        }
+    let attempts = 0;
+    const maxAttempts = 20; // 20 * 300ms = 6 seconds max
 
-        // Verify we actually have a session now
-        const { data: { session } } = await supabase!.auth.getSession();
-        if (session) {
-          console.log("[AuthCallback] Success! Redirecting to /app");
-          window.location.href = "/app";
-        } else {
-          console.error("[AuthCallback] No session after callback");
-          setError("Sign-in completed but no session was created. Please try again.");
-        }
-      } catch (err) {
-        console.error("[AuthCallback] Error:", err);
-        setError(err instanceof Error ? err.message : "Authentication failed");
+    const checkSession = async () => {
+      const { data: { session } } = await supabase!.auth.getSession();
+
+      if (session) {
+        console.log("[AuthCallback] Session found:", session.user.email);
+        // Clean URL and redirect
+        window.location.replace("/app");
+        return;
       }
-    }
 
-    handleCallback();
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkSession, 300);
+      } else {
+        console.error("[AuthCallback] No session after", maxAttempts, "attempts");
+        setError("Sign-in timed out. Please try again.");
+      }
+    };
+
+    // Small delay to let Supabase parse the hash
+    setTimeout(checkSession, 200);
   }, []);
+
+  void onComplete;
 
   if (error) {
     return (
@@ -64,8 +53,6 @@ export default function AuthCallback({ onComplete }: { onComplete: () => void })
       </div>
     );
   }
-
-  void onComplete; // used by router if needed
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "Inter, sans-serif", color: "#64748b", gap: 12 }}>
