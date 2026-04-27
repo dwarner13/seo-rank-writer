@@ -364,19 +364,52 @@
   font-size: 0.75rem; font-weight: 700; background: #e2e8f0; color: #475569;
   padding: 2px 8px; border-radius: 8px;
 }
+.kw-copy-all {
+  font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 6px;
+  border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer;
+  font-family: inherit; transition: all 0.15s;
+}
+.kw-copy-all:hover { border-color: #a5b4fc; color: #6366f1; }
 
 .kw-group-list { position: relative; }
-.kw-group-list--locked { min-height: 160px; }
+
+/* Locked section at bottom of group */
+.kw-locked-section { position: relative; border-top: 1px dashed #e2e8f0; }
 .kw-locked-overlay {
-  position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px; text-align: center;
-  background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 24px;
+  position: absolute; inset: 0; z-index: 5; display: flex;
+  align-items: center; justify-content: center; gap: 10px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(3px); padding: 16px;
 }
 .kw-locked-overlay span { font-size: 0.85rem; color: #64748b; font-weight: 600; }
 .kw-locked-btn {
-  display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff; font-size: 0.82rem; font-weight: 700; border-radius: 8px; text-decoration: none;
+  display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; font-size: 0.78rem; font-weight: 700; border-radius: 8px; text-decoration: none;
 }
+.kw-locked-blur { filter: blur(3px); pointer-events: none; user-select: none; }
+
+/* Plan badge in form header */
+.kw-form-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
+.kw-plan-badge {
+  font-size: 0.75rem; color: #92400e; background: #fef3c7; padding: 8px 14px;
+  border-radius: 10px; font-weight: 600; text-align: right; flex-shrink: 0; line-height: 1.5;
+}
+.kw-plan-badge a { display: block; color: #6366f1; font-weight: 700; margin-top: 2px; text-decoration: underline; }
+
+/* Form actions row */
+.kw-form-actions { display: flex; gap: 8px; }
+.kw-clear-btn {
+  padding: 13px 20px; font-size: 0.88rem; font-weight: 600;
+  background: #fff; color: #64748b; border: 1px solid #e2e8f0; border-radius: 10px;
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.kw-clear-btn:hover { border-color: #f87171; color: #dc2626; }
+
+/* Results header */
+.kw-results-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #475569;
+}
+.kw-results-limit { color: #94a3b8; font-weight: 500; }
 
 .kw-item {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;

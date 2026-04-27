@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePlan } from "../lib/PlanContext";
 
 interface Keyword {
@@ -25,16 +25,43 @@ interface KeywordResearchProps {
   onUseKeyword: (keyword: string, location: string) => void;
 }
 
+const KW_STORAGE_KEY = "seo-keyword-research";
+
+function loadSavedKeywords(): { data: KeywordData; input: { businessType: string; location: string; seedKeyword: string } } | null {
+  try {
+    const raw = localStorage.getItem(KW_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return null;
+}
+
+function saveKeywords(data: KeywordData, input: { businessType: string; location: string; seedKeyword: string }) {
+  try {
+    localStorage.setItem(KW_STORAGE_KEY, JSON.stringify({ data, input }));
+  } catch { /* storage full */ }
+}
+
 export default function KeywordResearch({ businessName, location: defaultLocation, mainKeyword, onUseKeyword }: KeywordResearchProps) {
-  const { canUse } = usePlan();
-  const [businessType, setBusinessType] = useState(businessName || "");
-  const [locationInput, setLocationInput] = useState(defaultLocation || "");
+  const { plan } = usePlan();
+  const isPaid = plan === "pro" || plan === "agency";
+
+  // Restore saved results
+  const saved = loadSavedKeywords();
+  const [businessType, setBusinessType] = useState(saved?.input.businessType || businessName || "");
+  const [locationInput, setLocationInput] = useState(saved?.input.location || defaultLocation || "");
   const [websiteUrl, setWebsiteUrl] = useState("");
-  const [seedKeyword, setSeedKeyword] = useState(mainKeyword || "");
+  const [seedKeyword, setSeedKeyword] = useState(saved?.input.seedKeyword || mainKeyword || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [data, setData] = useState<KeywordData | null>(null);
+  const [data, setData] = useState<KeywordData | null>(saved?.data || null);
   const [copied, setCopied] = useState("");
+
+  // Sync props if they change (e.g. user updates business name in sidebar)
+  useEffect(() => {
+    if (businessName && !businessType) setBusinessType(businessName);
+    if (defaultLocation && !locationInput) setLocationInput(defaultLocation);
+    if (mainKeyword && !seedKeyword) setSeedKeyword(mainKeyword);
+  }, [businessName, defaultLocation, mainKeyword]);
 
   async function handleGenerate() {
     if (!businessType.trim() && !seedKeyword.trim()) {
@@ -53,7 +80,6 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
       });
       const headers = { "Content-Type": "application/json" };
 
-      // Try Express server first (local dev), then Netlify function (production)
       let res = await fetch("/api/keyword-research", { method: "POST", headers, body: payload }).catch(() => null);
       if (!res || !res.ok) {
         res = await fetch("/.netlify/functions/keyword-research", { method: "POST", headers, body: payload });
@@ -62,7 +88,10 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || `Error ${res.status}`);
       }
-      setData(await res.json());
+      const result: KeywordData = await res.json();
+      setData(result);
+      // Persist to localStorage so results survive tab switches
+      saveKeywords(result, { businessType: businessType.trim(), location: locationInput.trim(), seedKeyword: seedKeyword.trim() });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to generate keywords.");
     } finally {
@@ -76,10 +105,22 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
     setTimeout(() => setCopied(""), 2000);
   }
 
+  function handleCopyAll(keywords: Keyword[]) {
+    const text = keywords.map(k => k.keyword).join("\n");
+    navigator.clipboard.writeText(text);
+    setCopied("__all__");
+    setTimeout(() => setCopied(""), 2000);
+  }
+
   function handleUse(kw: Keyword) {
     localStorage.setItem("seo_selected_keyword", kw.keyword);
     localStorage.setItem("seo_selected_location", locationInput);
     onUseKeyword(kw.keyword, locationInput);
+  }
+
+  function handleClearResults() {
+    setData(null);
+    localStorage.removeItem(KW_STORAGE_KEY);
   }
 
   const intentColor = (i: string) => {
@@ -101,23 +142,30 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
     }
   };
 
-  function renderGroup(title: string, icon: string, keywords: Keyword[], locked: boolean = false) {
+  // Free users: 3 per group visible, rest blurred
+  // Paid users: all visible
+  const FREE_LIMIT = 3;
+
+  function renderGroup(title: string, icon: string, keywords: Keyword[], requiresPaid: boolean = false) {
+    const visibleCount = (!requiresPaid || isPaid) ? keywords.length : FREE_LIMIT;
+    const visible = keywords.slice(0, visibleCount);
+    const locked = keywords.slice(visibleCount);
+    const hasLocked = locked.length > 0;
+
     return (
       <div className="kw-group">
         <div className="kw-group-header">
           <span className="kw-group-icon">{icon}</span>
           <h3 className="kw-group-title">{title}</h3>
           <span className="kw-group-count">{keywords.length}</span>
-        </div>
-        <div className={`kw-group-list ${locked ? "kw-group-list--locked" : ""}`}>
-          {locked && (
-            <div className="kw-locked-overlay">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span>Upgrade to Growth or Domination to unlock all keywords</span>
-              <a href="/#pricing" className="kw-locked-btn">View Plans</a>
-            </div>
+          {keywords.length > 0 && (
+            <button className="kw-copy-all" onClick={() => handleCopyAll(isPaid ? keywords : visible)} title="Copy all keywords">
+              {copied === "__all__" ? "\u2713 Copied" : "Copy All"}
+            </button>
           )}
-          {keywords.map((kw, i) => {
+        </div>
+        <div className="kw-group-list">
+          {visible.map((kw, i) => {
             const ic = intentColor(kw.intent);
             const dc = diffColor(kw.difficulty);
             return (
@@ -133,30 +181,63 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
                   <div className="kw-item-reason">{kw.reason}</div>
                 </div>
                 <div className="kw-item-actions">
-                  <button className="kw-action-btn" onClick={() => handleCopy(kw.keyword)} title="Copy keyword">
+                  <button className="kw-action-btn" onClick={() => handleCopy(kw.keyword)}>
                     {copied === kw.keyword ? "\u2713" : "Copy"}
                   </button>
-                  <button className="kw-action-btn kw-action-btn--primary" onClick={() => handleUse(kw)} title="Use in SEO Article">
+                  <button className="kw-action-btn kw-action-btn--primary" onClick={() => handleUse(kw)}>
                     Use in Article
                   </button>
                 </div>
               </div>
             );
           })}
+
+          {/* Locked keywords for free users */}
+          {hasLocked && (
+            <div className="kw-locked-section">
+              <div className="kw-locked-overlay">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>+{locked.length} more keywords</span>
+                <a href="/#pricing" className="kw-locked-btn">Upgrade to unlock</a>
+              </div>
+              <div className="kw-locked-blur">
+                {locked.slice(0, 2).map((kw, i) => (
+                  <div key={i} className="kw-item">
+                    <div className="kw-item-main">
+                      <div className="kw-item-keyword">{kw.keyword}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  const isPro = canUse("generate"); // simplified check
+  // Count total keywords
+  const totalKeywords = data
+    ? data.topMoneyKeywords.length + data.longTailKeywords.length + data.questionKeywords.length + data.localSeoKeywords.length + data.contentIdeas.length
+    : 0;
 
   return (
     <div className="kw-page">
       <div className="kw-wrap">
         {/* Input Form */}
         <div className="kw-form-card">
-          <h2 className="kw-form-title">Keyword Research</h2>
-          <p className="kw-form-desc">Enter your business details to discover high-value SEO keyword opportunities.</p>
+          <div className="kw-form-header">
+            <div>
+              <h2 className="kw-form-title">Keyword Research</h2>
+              <p className="kw-form-desc">Enter your business details to discover high-value SEO keyword opportunities.</p>
+            </div>
+            {!isPaid && (
+              <div className="kw-plan-badge">
+                Free — {FREE_LIMIT} keywords per group
+                <a href="/#pricing">Upgrade for full access</a>
+              </div>
+            )}
+          </div>
           <div className="kw-form-grid">
             <div className="field">
               <label>Business Type / Niche</label>
@@ -175,9 +256,14 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
               <input type="text" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)} placeholder="e.g. https://example.com" />
             </div>
           </div>
-          <button className="kw-gen-btn" onClick={handleGenerate} disabled={loading || (!businessType.trim() && !seedKeyword.trim())}>
-            {loading ? "Researching keywords..." : "Generate Keyword Research"}
-          </button>
+          <div className="kw-form-actions">
+            <button className="kw-gen-btn" onClick={handleGenerate} disabled={loading || (!businessType.trim() && !seedKeyword.trim())}>
+              {loading ? "Researching keywords..." : "Generate Keyword Research"}
+            </button>
+            {data && (
+              <button className="kw-clear-btn" onClick={handleClearResults}>Clear Results</button>
+            )}
+          </div>
           {error && <div className="kw-error">{error}</div>}
         </div>
 
@@ -186,18 +272,25 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
           <div className="kw-loading">
             <div className="kw-spinner" />
             <p>Analyzing keyword opportunities...</p>
+            <p style={{ fontSize: "0.82rem", color: "#94a3b8" }}>This takes 10-20 seconds</p>
           </div>
         )}
 
         {/* Results */}
         {data && !loading && (
-          <div className="kw-results">
-            {renderGroup("Money Keywords", "\uD83D\uDCB0", data.topMoneyKeywords)}
-            {renderGroup("Long-Tail Keywords", "\uD83C\uDFAF", data.longTailKeywords, !isPro)}
-            {renderGroup("Question Keywords", "\u2753", data.questionKeywords, !isPro)}
-            {renderGroup("Local SEO Keywords", "\uD83D\uDCCD", data.localSeoKeywords)}
-            {renderGroup("Content Ideas", "\uD83D\uDCA1", data.contentIdeas, !isPro)}
-          </div>
+          <>
+            <div className="kw-results-header">
+              <span>{totalKeywords} keywords found</span>
+              {!isPaid && <span className="kw-results-limit">{FREE_LIMIT * 5} visible — upgrade for all {totalKeywords}</span>}
+            </div>
+            <div className="kw-results">
+              {renderGroup("Money Keywords", "\uD83D\uDCB0", data.topMoneyKeywords, true)}
+              {renderGroup("Long-Tail Keywords", "\uD83C\uDFAF", data.longTailKeywords, true)}
+              {renderGroup("Question Keywords", "\u2753", data.questionKeywords, true)}
+              {renderGroup("Local SEO Keywords", "\uD83D\uDCCD", data.localSeoKeywords, true)}
+              {renderGroup("Content Ideas", "\uD83D\uDCA1", data.contentIdeas, true)}
+            </div>
+          </>
         )}
 
         {/* Empty state */}
