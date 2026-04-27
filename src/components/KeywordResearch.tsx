@@ -45,16 +45,19 @@ export default function KeywordResearch({ businessName, location: defaultLocatio
     setError("");
     setData(null);
     try {
-      const res = await fetch("/.netlify/functions/keyword-research", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          businessType: businessType.trim(),
-          location: locationInput.trim(),
-          websiteUrl: websiteUrl.trim() || undefined,
-          seedKeyword: seedKeyword.trim() || undefined,
-        }),
+      const payload = JSON.stringify({
+        businessType: businessType.trim(),
+        location: locationInput.trim(),
+        websiteUrl: websiteUrl.trim() || undefined,
+        seedKeyword: seedKeyword.trim() || undefined,
       });
+      const headers = { "Content-Type": "application/json" };
+
+      // Try Express server first (local dev), then Netlify function (production)
+      let res = await fetch("/api/keyword-research", { method: "POST", headers, body: payload }).catch(() => null);
+      if (!res || !res.ok) {
+        res = await fetch("/.netlify/functions/keyword-research", { method: "POST", headers, body: payload });
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || `Error ${res.status}`);

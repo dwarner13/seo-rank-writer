@@ -1616,6 +1616,53 @@ Rules:
   }
 });
 
+// ── Keyword Research ───────────────────────────────────────────────
+app.post("/api/keyword-research", async (req, res) => {
+  const { businessType, location, seedKeyword, websiteUrl } = req.body;
+  if (!businessType && !seedKeyword) {
+    return res.status(400).json({ error: "Provide a business type or seed keyword." });
+  }
+
+  try {
+    const message = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 4096,
+      messages: [{
+        role: "user",
+        content: `You are an expert local SEO strategist. Generate keyword research for:
+
+Business Type: ${businessType || "local service business"}
+Location: ${location || "general"}
+${websiteUrl ? `Website: ${websiteUrl}` : ""}
+${seedKeyword ? `Seed Keyword: ${seedKeyword}` : ""}
+
+Return ONLY valid JSON, no markdown fences. Structure:
+{
+  "topMoneyKeywords": [5 high buyer-intent keywords],
+  "longTailKeywords": [5 easier-to-rank long-tail phrases],
+  "questionKeywords": [5 question-based keywords for FAQ/blog],
+  "localSeoKeywords": [5 location-specific keywords],
+  "contentIdeas": [5 article/page title suggestions]
+}
+
+Each keyword: { "keyword": "string", "intent": "Commercial|Local|Informational|Transactional", "difficulty": "Easy|Medium|Hard", "priorityScore": 1-100, "pageType": "Service Page|Blog Post|Location Page|FAQ|GBP Post", "reason": "brief reason" }
+
+Rules: money keywords 80-100 priority, local 70-90, long-tail 50-75, questions 40-65. Each group exactly 5 items.`,
+      }],
+    });
+
+    const text = message.content.filter(b => b.type === "text").map(b => b.text).join("");
+    const cleaned = text.replace(/^```(?:json)?\s*\n?/i, "").replace(/\n?\s*```$/, "").trim();
+    res.json(JSON.parse(cleaned));
+  } catch (err) {
+    console.error("Keyword research error:", err);
+    if (err instanceof SyntaxError) {
+      return res.status(502).json({ error: "AI returned invalid JSON. Please try again." });
+    }
+    res.status(err?.status || 500).json({ error: err?.message || "Keyword research failed." });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
