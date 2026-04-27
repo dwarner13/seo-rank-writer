@@ -5,3 +5,20 @@
 
 [functions]
   node_bundler = "esbuild"
+  # Increase timeout for AI-heavy functions (requires Netlify Pro for >10s)
+  external_node_modules = ["stripe"]
+
+[functions."generate"]
+  timeout = 60
+
+[functions."humanize"]
+  timeout = 60
+
+[functions."keyword-research"]
+  timeout = 30
+
+[functions."regenerate-field"]
+  timeout = 30
+
+[functions."internal-links"]
+  timeout = 30

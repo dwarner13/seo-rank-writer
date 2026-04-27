@@ -14,7 +14,7 @@ const handler: Handler = async (event) => {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 8192,
+        model: "claude-sonnet-4-20250514", max_tokens: 4096,
         system: `You are an expert copy editor. Make AI content sound natural and human. Respond with JSON only: { "article": "..." }. Keep ALL HTML tags, links, headings, FAQ section. Vary sentence lengths, remove robotic patterns, add conversational touches.`,
         messages: [{ role: "user", content: `Humanize this article. Keyword: "${mainKeyword || ""}". Location: "${location || ""}".\n\n${article}` }],
       }),

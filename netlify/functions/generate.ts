@@ -41,7 +41,7 @@ Write a full SEO article with H1/H2/H3, FAQ section, CTAs. Include meta title, d
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 8192, system: systemPrompt, messages: [{ role: "user", content: userContent }] }),
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 4096, system: systemPrompt, messages: [{ role: "user", content: userContent }] }),
     });
     if (!res.ok) { const e = await res.text(); console.error("API error:", e); return { statusCode: 502, body: '{"error":"AI service error"}' }; }
     const data = await res.json();
