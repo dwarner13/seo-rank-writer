@@ -55,22 +55,32 @@ function Router() {
   }, [loading, enabled, user, path, navigate])
 
   // Show loading spinner while auth is being checked
-  // This prevents the flash-redirect-to-login on OAuth callbacks
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#64748b', gap: 12 }}>
-        <img src="/logo.png" alt="SEO Rank Writer" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain' }} />
-        <span>Loading...</span>
+        <img src="/logo.png" alt="SEO Rank Writer" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain' as const }} />
+        <span>Signing in...</span>
       </div>
     )
   }
 
   // Protected route: /app requires auth (when Supabase is enabled)
   if (path === '/app') {
-    if (enabled && !user) {
+    // Don't redirect if there's an OAuth hash/code being processed
+    const hasAuthParams = window.location.hash.includes('access_token') || window.location.search.includes('code=')
+    if (enabled && !user && !hasAuthParams) {
       console.log("[Auth] No session for /app, redirecting to /login")
       window.history.replaceState({}, '', '/login')
       return <LoginPage onNavigate={navigate} />
+    }
+    if (enabled && !user && hasAuthParams) {
+      // Still waiting for OAuth to resolve — show loading
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: '#64748b', gap: 12 }}>
+          <img src="/logo.png" alt="SEO Rank Writer" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'contain' as const }} />
+          <span>Completing sign in...</span>
+        </div>
+      )
     }
     return <App />
   }
