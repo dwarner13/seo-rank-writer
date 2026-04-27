@@ -13,6 +13,7 @@ import MediaGenerator from "./components/MediaGenerator";
 import type { VideoPromptSet } from "./types";
 import type { ImagePromptSet } from "./services/media";
 import { useAuth } from "./lib/AuthContext";
+import KeywordResearch from "./components/KeywordResearch";
 import { getProjects, createProject, updateProject, saveArticle, getArticles, incrementUsage } from "./lib/database";
 import { usePlan } from "./lib/PlanContext";
 import { createCheckoutSession, createPortalSession } from "./lib/stripe";
@@ -49,10 +50,11 @@ function saveSettings(s: AppSettings) {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
 }
 
-type Tab = "dashboard" | "article" | "metadata" | "schema" | "social" | "gbp" | "media" | "mediagen" | "score" | "wordpress" | "analytics" | "settings" | "account" | "insights";
+type Tab = "dashboard" | "article" | "metadata" | "schema" | "social" | "gbp" | "media" | "mediagen" | "score" | "wordpress" | "analytics" | "settings" | "account" | "insights" | "keywords";
 
 const SIDEBAR_ITEMS: { key: Tab; label: string; icon: string }[] = [
   { key: "dashboard", label: "Dashboard", icon: "\u2302" },
+  { key: "keywords", label: "Keyword Research", icon: "\uD83D\uDD0D" },
   { key: "article", label: "SEO Article", icon: "\uD83D\uDCDD" },
   { key: "metadata", label: "Metadata", icon: "\uD83C\uDFF7\uFE0F" },
   { key: "schema", label: "Schema", icon: "\u007B\u007D" },
@@ -1630,6 +1632,17 @@ function App() {
         <div className="app-content-area">
           {activeTab === "dashboard" ? (
             renderDashboardHome()
+          ) : activeTab === "keywords" ? (
+            <KeywordResearch
+              businessName={businessName}
+              location={location}
+              mainKeyword={mainKeyword}
+              onUseKeyword={(kw, loc) => {
+                setMainKeyword(kw);
+                if (loc) setLocation(loc);
+                setActiveTab("article");
+              }}
+            />
           ) : activeTab === "settings" ? (
             <div className="settings-page">
               <div className="settings-wrap">

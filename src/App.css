@@ -322,6 +322,99 @@
 }
 .usage-upgrade-btn:disabled { opacity: 0.5; }
 
+/* ── Keyword Research ── */
+.kw-page { padding: 24px; overflow-y: auto; max-height: calc(100vh - 56px); }
+.kw-wrap { max-width: 900px; }
+
+.kw-form-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; margin-bottom: 24px;
+}
+.kw-form-title { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
+.kw-form-desc { font-size: 0.9rem; color: #64748b; margin: 0 0 20px; }
+.kw-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px; }
+.kw-gen-btn {
+  width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+  border: none; border-radius: 10px; cursor: pointer; font-family: inherit;
+  transition: opacity 0.15s;
+}
+.kw-gen-btn:hover:not(:disabled) { opacity: 0.9; }
+.kw-gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.kw-error { margin-top: 12px; padding: 10px 14px; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }
+
+.kw-loading { text-align: center; padding: 48px 24px; }
+.kw-spinner { width: 32px; height: 32px; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+.kw-loading p { color: #64748b; font-weight: 500; }
+
+.kw-empty { text-align: center; padding: 64px 24px; }
+.kw-empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.kw-empty h3 { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 0 0 6px; }
+.kw-empty p { font-size: 0.9rem; color: #64748b; max-width: 400px; margin: 0 auto; }
+
+/* Results */
+.kw-results { display: flex; flex-direction: column; gap: 20px; }
+.kw-group { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+.kw-group-header {
+  display: flex; align-items: center; gap: 8px; padding: 14px 20px;
+  background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+}
+.kw-group-icon { font-size: 1.1rem; }
+.kw-group-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; flex: 1; margin: 0; }
+.kw-group-count {
+  font-size: 0.75rem; font-weight: 700; background: #e2e8f0; color: #475569;
+  padding: 2px 8px; border-radius: 8px;
+}
+
+.kw-group-list { position: relative; }
+.kw-group-list--locked { min-height: 160px; }
+.kw-locked-overlay {
+  position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px; text-align: center;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); padding: 24px;
+}
+.kw-locked-overlay span { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+.kw-locked-btn {
+  display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; font-size: 0.82rem; font-weight: 700; border-radius: 8px; text-decoration: none;
+}
+
+.kw-item {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
+}
+.kw-item:last-child { border-bottom: none; }
+.kw-item-main { flex: 1; min-width: 0; }
+.kw-item-keyword { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+.kw-item-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.kw-tag {
+  font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 8px;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.kw-tag--type { background: #f1f5f9; color: #475569; }
+.kw-tag--score { background: #ede9fe; color: #5b21b6; }
+.kw-item-reason { font-size: 0.78rem; color: #94a3b8; }
+.kw-item-actions { display: flex; gap: 6px; flex-shrink: 0; padding-top: 2px; }
+.kw-action-btn {
+  padding: 5px 10px; font-size: 0.75rem; font-weight: 600; border-radius: 6px;
+  border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer;
+  font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.kw-action-btn:hover { border-color: #a5b4fc; color: #6366f1; }
+.kw-action-btn--primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border-color: transparent;
+}
+.kw-action-btn--primary:hover { opacity: 0.9; }
+
+@media (max-width: 768px) {
+  .kw-form-grid { grid-template-columns: 1fr; }
+  .kw-item { flex-direction: column; }
+  .kw-item-actions { width: 100%; }
+}
+@media (max-width: 480px) {
+  .kw-page { padding: 16px; }
+  .kw-form-card { padding: 20px; }
+}
+
 /* ── Override old layout to fit inside new content area ── */
 .app--v2 .layout {
   display: grid;
