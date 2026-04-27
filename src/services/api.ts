@@ -1,39 +1,39 @@
 import type { GeneratedContent, GenerateOptions, PageType } from "../types";
 
-export async function generateContent(
-  options: GenerateOptions
-): Promise<GeneratedContent> {
-  const res = await fetch("/api/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(options),
-  });
+/**
+ * Try Express server first (local dev via Vite proxy), fall back to Netlify function (production).
+ */
+async function apiFetch(expressPath: string, netlifyFunc: string, options: RequestInit): Promise<Response> {
+  let res = await fetch(expressPath, options).catch(() => null);
+  if (res && res.ok) return res;
+  // If Express returned an error body (not a 404/network fail), use it
+  if (res && res.status >= 400 && res.status < 500) return res;
+  // Fall back to Netlify function
+  res = await fetch(`/.netlify/functions/${netlifyFunc}`, options);
+  return res;
+}
 
+function postJson(body: unknown): RequestInit {
+  return { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+}
+
+export async function generateContent(options: GenerateOptions): Promise<GeneratedContent> {
+  const res = await apiFetch("/api/generate", "generate", postJson(options));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   return res.json();
 }
 
 export async function humanizeArticle(options: {
-  article: string;
-  mainKeyword: string;
-  location: string;
-  tone: string;
+  article: string; mainKeyword: string; location: string; tone: string;
 }): Promise<string> {
-  const res = await fetch("/api/humanize", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(options),
-  });
-
+  const res = await apiFetch("/api/humanize", "humanize", postJson(options));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.article;
 }
@@ -45,38 +45,23 @@ export interface InternalLink {
 }
 
 export async function generateInternalLinks(options: {
-  sitemapUrls: string;
-  mainKeyword: string;
-  location: string;
-  businessName: string;
+  sitemapUrls: string; mainKeyword: string; location: string; businessName: string;
 }): Promise<InternalLink[]> {
-  const res = await fetch("/api/internal-links", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(options),
-  });
-
+  const res = await apiFetch("/api/internal-links", "internal-links", postJson(options));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.links;
 }
 
 export async function fetchSitemapUrls(websiteUrl: string): Promise<string[]> {
-  const res = await fetch("/api/fetch-sitemap", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ websiteUrl }),
-  });
-
+  const res = await apiFetch("/api/fetch-sitemap", "fetch-sitemap", postJson({ websiteUrl }));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.urls;
 }
@@ -89,64 +74,36 @@ export interface UrlValidationResult {
 }
 
 export async function validateUrls(urls: string[]): Promise<UrlValidationResult[]> {
-  const res = await fetch("/api/validate-urls", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ urls }),
-  });
-
+  const res = await apiFetch("/api/validate-urls", "validate-urls", postJson({ urls }));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.results;
 }
 
 export async function generateKeywords(options: {
-  mainKeyword: string;
-  location: string;
-  businessName: string;
-  pageType: PageType;
+  mainKeyword: string; location: string; businessName: string; pageType: PageType;
 }): Promise<string[]> {
-  const res = await fetch("/api/generate-keywords", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(options),
-  });
-
+  const res = await apiFetch("/api/generate-keywords", "generate-keywords", postJson(options));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.keywords;
 }
 
 export async function regenerateField(options: {
-  field: string;
-  currentContent: string;
-  context: {
-    mainKeyword: string;
-    location: string;
-    businessName: string;
-    pageType: string;
-    tone: string;
-  };
+  field: string; currentContent: string;
+  context: { mainKeyword: string; location: string; businessName: string; pageType: string; tone: string; };
 }): Promise<unknown> {
-  const res = await fetch("/api/regenerate-field", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(options),
-  });
-
+  const res = await apiFetch("/api/regenerate-field", "regenerate-field", postJson(options));
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Server error (${res.status})`);
   }
-
   const data = await res.json();
   return data.value;
 }
