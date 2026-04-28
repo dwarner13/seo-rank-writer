@@ -450,6 +450,7 @@ function App() {
 
   const [demoMode, setDemoMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleLoadDemo = () => {
     setBusinessName("Calgary Emergency Plumbing");
@@ -985,6 +986,24 @@ function App() {
                 </table>
               </div>
             )}
+
+            {/* SEO Insight Bar */}
+            <div className="seo-insight-bar">
+              <div className="seo-insight-score" style={{ borderColor: seoScore.score >= 80 ? "#16a34a" : seoScore.score >= 50 ? "#ca8a04" : "#dc2626" }}>
+                <span className="seo-insight-num">{seoScore.score}</span>
+              </div>
+              <div className="seo-insight-info">
+                <div className="seo-insight-label">SEO Score — {seoScore.status}</div>
+                <div className="seo-insight-checks">
+                  {Object.entries(seoScore.categories).slice(0, 4).map(([key, cat]) => (
+                    <span key={key} className={`seo-insight-check ${cat.earned >= cat.max * 0.6 ? "pass" : "fail"}`}>
+                      {cat.earned >= cat.max * 0.6 ? "\u2713" : "\u2717"} {key}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button className="kw-btn" onClick={() => setActiveTab("score")}>View Full Score</button>
+            </div>
 
             {/* After Article Toolkit */}
             <div className="article-toolkit">
@@ -2001,17 +2020,44 @@ function App() {
           <div className="layout">
             {/* LEFT PANEL — Inputs */}
             <aside className="input-panel">
-          <h2 className="section-title">Business Info</h2>
+
+          {/* Context bar */}
+          {(mainKeyword || kwBanner) && (
+            <div className="article-context-bar">
+              <div className="article-context-kw">{"\uD83C\uDFAF"} {mainKeyword || kwBanner}</div>
+              <div className="article-context-meta">
+                {pageType && <span>{pageType}</span>}
+                {location && <span>{location}</span>}
+              </div>
+              <button className="article-context-change" onClick={() => setActiveTab("keywords")}>Change Keyword</button>
+            </div>
+          )}
+
+          <h2 className="section-title">Core Details</h2>
           <div className="field">
             <label htmlFor="businessName">Business Name</label>
             <input id="businessName" type="text" placeholder="e.g. Cash for Cars Vancouver"
               value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
           </div>
           <div className="field">
-            <label htmlFor="websiteUrl">Website URL</label>
-            <input id="websiteUrl" type="text" placeholder="e.g. https://cashforcarsvancouver.ca"
-              value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
+            <label htmlFor="mainKeyword">Main Keyword</label>
+            <input id="mainKeyword" type="text" placeholder="e.g. cash for cars McNair"
+              value={mainKeyword} onChange={(e) => setMainKeyword(e.target.value)} />
           </div>
+          <div className="controls-row two-col">
+            <div className="field">
+              <label htmlFor="location">Location</label>
+              <input id="location" type="text" placeholder="e.g. McNair Richmond BC"
+                value={location} onChange={(e) => setLocation(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="websiteUrl">Website URL</label>
+              <input id="websiteUrl" type="text" placeholder="https://example.com"
+                value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
+            </div>
+          </div>
+
+          <h2 className="section-title">Article Settings</h2>
           <div className="controls-row three-col">
             <div className="field">
               <label htmlFor="pageType">Page Type</label>
@@ -2046,17 +2092,13 @@ function App() {
             </div>
           </div>
 
-          <h2 className="section-title">Keywords &amp; Location</h2>
-          <div className="field">
-            <label htmlFor="mainKeyword">Main Keyword</label>
-            <input id="mainKeyword" type="text" placeholder="e.g. cash for cars McNair"
-              value={mainKeyword} onChange={(e) => setMainKeyword(e.target.value)} />
-          </div>
-          <div className="field">
-            <label htmlFor="location">Location / City / Area</label>
-            <input id="location" type="text" placeholder="e.g. McNair Richmond BC"
-              value={location} onChange={(e) => setLocation(e.target.value)} />
-          </div>
+          {/* Advanced SEO Controls */}
+          <button className="advanced-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
+            <span>{showAdvanced ? "\u25BC" : "\u25B6"} Advanced SEO Controls</span>
+            <span className="advanced-toggle-hint">{showAdvanced ? "Hide" : "Keywords, links, rewrite"}</span>
+          </button>
+          <div className={`advanced-panel ${showAdvanced ? "advanced-panel--open" : ""}`}>
+
           <div className="field">
             <div className="label-with-action">
               <label htmlFor="secondaryKeywords">Secondary Keywords</label>
@@ -2171,6 +2213,8 @@ function App() {
               value={customInstructions} onChange={(e) => setCustomInstructions(e.target.value)} />
           </div>
 
+          </div>{/* end advanced-panel */}
+
           <div className="sticky-generate">
             {kwBanner && (
               <div className="kw-banner">
@@ -2205,7 +2249,17 @@ function App() {
         <main className="results-panel" ref={resultsRef}>
           {!result && !loading && (
             <div className="empty-results">
-              <p>Fill in the fields on the left and click <strong>Generate SEO Content</strong> to see results here.</p>
+              <div className="empty-results__icon">{"\u26A1"}</div>
+              <h3>Your SEO article will appear here</h3>
+              <p>Enter your keyword and business details, then generate. SEO Rank Writer will create:</p>
+              <div className="empty-results__list">
+                <span>{"\uD83D\uDCDD"} Full SEO article with H1-H3</span>
+                <span>{"\uD83C\uDFF7\uFE0F"} Meta title &amp; description</span>
+                <span>{"\u007B\u007D"} Schema JSON-LD</span>
+                <span>{"\uD83D\uDCF1"} Social media posts</span>
+                <span>{"\uD83D\uDCCD"} GBP posts</span>
+                <span>{"\uD83C\uDFA5"} Media prompts</span>
+              </div>
             </div>
           )}
 
