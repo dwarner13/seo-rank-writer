@@ -451,6 +451,7 @@ function App() {
   const [demoMode, setDemoMode] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [resultTab, setResultTab] = useState<"article" | "meta" | "schema" | "social" | "links">("article");
 
   const handleLoadDemo = () => {
     setBusinessName("Calgary Emergency Plumbing");
@@ -927,6 +928,20 @@ function App() {
       case "article":
         return (
           <div className="tab-content">
+            {/* Result Tabs */}
+            <div className="result-tabs">
+              {([
+                { key: "article" as const, label: "Article" },
+                { key: "meta" as const, label: "Metadata" },
+                { key: "schema" as const, label: "Schema" },
+                { key: "social" as const, label: "Social" },
+                { key: "links" as const, label: "Links" },
+              ]).map(t => (
+                <button key={t.key} className={`result-tab ${resultTab === t.key ? "result-tab--active" : ""}`} onClick={() => setResultTab(t.key)}>{t.label}</button>
+              ))}
+            </div>
+
+            {resultTab === "article" && (<>
             <div className="tab-actions">
               <button className="humanize-btn" onClick={handleHumanize} disabled={humanizing}>
                 {humanizing ? "Humanizing..." : "Humanize Copy"}
@@ -1002,21 +1017,86 @@ function App() {
                   ))}
                 </div>
               </div>
-              <button className="kw-btn" onClick={() => setActiveTab("score")}>View Full Score</button>
+              <button className="kw-btn" onClick={() => setActiveTab("score")}>Full Score</button>
             </div>
 
-            {/* After Article Toolkit */}
+            {/* Toolkit */}
             <div className="article-toolkit">
-              <h4 className="article-toolkit__title">What would you like to create next?</h4>
+              <h4 className="article-toolkit__title">Next steps</h4>
               <div className="article-toolkit__grid">
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("metadata")}>{"\uD83C\uDFF7\uFE0F"} Generate Metadata</button>
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("schema")}>{"\u007B\u007D"} Generate Schema</button>
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("social")}>{"\uD83D\uDCF1"} Create Social Posts</button>
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("gbp")}>{"\uD83D\uDCCD"} Create GBP Posts</button>
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("mediagen")}>{"\uD83C\uDFA5"} Generate Media</button>
-                <button className="article-toolkit__btn" onClick={() => navigateToTool("wordpress")}>{"\uD83C\uDF10"} Send to WordPress</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("metadata")}>{"\uD83C\uDFF7\uFE0F"} Metadata</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("schema")}>{"\u007B\u007D"} Schema</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("social")}>{"\uD83D\uDCF1"} Social</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("gbp")}>{"\uD83D\uDCCD"} GBP</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("mediagen")}>{"\uD83C\uDFA5"} Media</button>
+                <button className="article-toolkit__btn" onClick={() => navigateToTool("wordpress")}>{"\uD83C\uDF10"} WordPress</button>
               </div>
             </div>
+            </>)}
+
+            {/* Metadata Tab */}
+            {resultTab === "meta" && (
+              <div className="result-panel-content">
+                <div className="cards-grid">
+                  <OutputCard title="Meta Title" content={result.metaTitle} accent="#059669" onRegenerate={() => handleRegen("metaTitle", result.metaTitle)} regenerating={regenField === "metaTitle"} />
+                  <OutputCard title="Meta Description" content={result.metaDescription} accent="#059669" onRegenerate={() => handleRegen("metaDescription", result.metaDescription)} regenerating={regenField === "metaDescription"} />
+                  <OutputCard title="Focus Keyword" content={result.focusKeyword} accent="#059669" onRegenerate={() => handleRegen("focusKeyword", result.focusKeyword)} regenerating={regenField === "focusKeyword"} />
+                  <OutputCard title="URL Slug" content={result.urlSlug} accent="#059669" onRegenerate={() => handleRegen("urlSlug", result.urlSlug)} regenerating={regenField === "urlSlug"} />
+                </div>
+                <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
+                  <OutputCard title="Keyword Suggestions" content={result.keywordSuggestions.join("\n")} accent="#059669" onRegenerate={() => handleRegen("keywordSuggestions", result.keywordSuggestions.join("\n"))} regenerating={regenField === "keywordSuggestions"} />
+                </div>
+              </div>
+            )}
+
+            {/* Schema Tab */}
+            {resultTab === "schema" && (
+              <div className="result-panel-content">
+                <OutputCard title="Schema JSON-LD" content={result.schema} accent="#7c3aed" onRegenerate={() => handleRegen("schema", result.schema)} regenerating={regenField === "schema"} />
+              </div>
+            )}
+
+            {/* Social Tab */}
+            {resultTab === "social" && (
+              <div className="result-panel-content">
+                <div className="cards-grid">
+                  <OutputCard title="Facebook" content={result.facebook} accent="#1877F2" onRegenerate={() => handleRegen("facebook", result.facebook)} regenerating={regenField === "facebook"} />
+                  <OutputCard title="Instagram" content={result.instagram} accent="#E4405F" onRegenerate={() => handleRegen("instagram", result.instagram)} regenerating={regenField === "instagram"} />
+                  <OutputCard title="LinkedIn" content={result.linkedin} accent="#0A66C2" onRegenerate={() => handleRegen("linkedin", result.linkedin)} regenerating={regenField === "linkedin"} />
+                  <OutputCard title="TikTok Script" content={result.tiktokScript} accent="#000" onRegenerate={() => handleRegen("tiktokScript", result.tiktokScript)} regenerating={regenField === "tiktokScript"} />
+                </div>
+                <div className="cards-grid single" style={{ marginTop: "0.75rem" }}>
+                  <OutputCard title="Hashtags" content={result.hashtags.join("  ")} accent="#6C63FF" onRegenerate={() => handleRegen("hashtags", result.hashtags.join("  "))} regenerating={regenField === "hashtags"} />
+                </div>
+              </div>
+            )}
+
+            {/* Links Tab */}
+            {resultTab === "links" && (
+              <div className="result-panel-content">
+                {internalLinks.trim() ? (
+                  <div className="generated-links-preview" style={{ borderRadius: 12 }}>
+                    {internalLinks.trim().split("\n").filter(Boolean).map((line, i) => {
+                      const parts = line.split("|").map(p => p.trim());
+                      return (
+                        <div key={i} className="gen-link-row">
+                          <div className="gen-link-main">
+                            <span className="gen-link-anchor">{parts[0]}</span>
+                            <span className="gen-link-arrow">&rarr;</span>
+                            <span className="gen-link-url">{parts[1] || ""}</span>
+                          </div>
+                          {parts[2] && <span className="gen-link-reason">{parts[2]}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="tool-empty-state" style={{ padding: 40 }}>
+                    <p>No internal links generated yet. Use the Advanced SEO Controls in the left panel to add sitemap URLs and generate links.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
 
@@ -2018,77 +2098,51 @@ function App() {
             </div>
           ) : (
           <div className="layout">
-            {/* LEFT PANEL — Inputs */}
+            {/* LEFT PANEL — AI Builder */}
             <aside className="input-panel">
 
-          {/* Context bar */}
-          {(mainKeyword || kwBanner) && (
-            <div className="article-context-bar">
-              <div className="article-context-kw">{"\uD83C\uDFAF"} {mainKeyword || kwBanner}</div>
-              <div className="article-context-meta">
-                {pageType && <span>{pageType}</span>}
-                {location && <span>{location}</span>}
-              </div>
-              <button className="article-context-change" onClick={() => setActiveTab("keywords")}>Change Keyword</button>
+          {/* AI Builder Header */}
+          <div className="builder-header">
+            <div className="builder-header__icon">{"\u26A1"}</div>
+            <div>
+              <h2 className="builder-header__title">AI Content Builder</h2>
+              <p className="builder-header__sub">Enter your keyword and location. AI handles the rest.</p>
             </div>
-          )}
-
-          <h2 className="section-title">Core Details</h2>
-          <div className="field">
-            <label htmlFor="businessName">Business Name</label>
-            <input id="businessName" type="text" placeholder="e.g. Cash for Cars Vancouver"
-              value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
           </div>
+
           <div className="field">
-            <label htmlFor="mainKeyword">Main Keyword</label>
-            <input id="mainKeyword" type="text" placeholder="e.g. cash for cars McNair"
-              value={mainKeyword} onChange={(e) => setMainKeyword(e.target.value)} />
+            <label htmlFor="mainKeyword">Target Keyword</label>
+            <input id="mainKeyword" type="text" placeholder="e.g. cash for cars Richmond"
+              value={mainKeyword} onChange={(e) => setMainKeyword(e.target.value)} className="builder-input--lg" />
           </div>
           <div className="controls-row two-col">
             <div className="field">
               <label htmlFor="location">Location</label>
-              <input id="location" type="text" placeholder="e.g. McNair Richmond BC"
+              <input id="location" type="text" placeholder="e.g. Richmond BC"
                 value={location} onChange={(e) => setLocation(e.target.value)} />
             </div>
             <div className="field">
-              <label htmlFor="websiteUrl">Website URL</label>
-              <input id="websiteUrl" type="text" placeholder="https://example.com"
-                value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
+              <label htmlFor="businessName">Business Name</label>
+              <input id="businessName" type="text" placeholder="e.g. Cash for Cars Vancouver"
+                value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
             </div>
           </div>
-
-          <h2 className="section-title">Article Settings</h2>
-          <div className="controls-row three-col">
+          <div className="controls-row two-col">
             <div className="field">
-              <label htmlFor="pageType">Page Type</label>
+              <label htmlFor="pageType">Content Type</label>
               <select id="pageType" value={pageType} onChange={(e) => setPageType(e.target.value as PageType)}>
                 <option value="location">Location page</option>
                 <option value="service">Service page</option>
                 <option value="blog">Blog post</option>
-                <option value="homepage">Homepage section</option>
+                <option value="homepage">Homepage</option>
                 <option value="landing">Landing page</option>
                 <option value="faq">FAQ page</option>
               </select>
             </div>
             <div className="field">
-              <label htmlFor="wordCount">Word Count</label>
-              <select id="wordCount" value={wordCount} onChange={(e) => setWordCount(e.target.value as WordCount)}>
-                <option value="800">800</option>
-                <option value="1200">1,200</option>
-                <option value="1500">1,500</option>
-                <option value="2000">2,000</option>
-                <option value="2500">2,500</option>
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="tone">Tone</label>
-              <select id="tone" value={tone} onChange={(e) => setTone(e.target.value as Tone)}>
-                <option value="professional">Professional</option>
-                <option value="friendly">Friendly</option>
-                <option value="local-expert">Local expert</option>
-                <option value="sales">Sales-focused</option>
-                <option value="trust">Trust-building</option>
-              </select>
+              <label htmlFor="websiteUrl">Website URL</label>
+              <input id="websiteUrl" type="text" placeholder="https://example.com"
+                value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
             </div>
           </div>
 
@@ -2219,28 +2273,45 @@ function App() {
             {kwBanner && (
               <div className="kw-banner">
                 <div className="kw-banner-text">Keyword loaded: <strong>{kwBanner}</strong></div>
-                <div className="kw-banner-hint">Click Generate SEO Content to create an article for this keyword.</div>
                 <button className="kw-banner-close" onClick={() => { setKwBanner(""); localStorage.removeItem("seo_selected_keyword"); }}>&times;</button>
               </div>
             )}
             {authEnabled && user && (
               <div className="usage-indicator">
-                <span className="usage-text">{generationsUsed} / {generationLimit} articles this month</span>
-                {remainingGenerations <= 1 && remainingGenerations > 0 && <span className="usage-warn">Last free generation</span>}
-                {remainingGenerations === 0 && <span className="usage-limit">Limit reached — <button className="usage-upgrade-btn" onClick={handleUpgrade} disabled={upgrading}>{upgrading ? "..." : "Upgrade"}</button></span>}
+                <span className="usage-text">{generationsUsed} / {generationLimit} this month</span>
+                {remainingGenerations === 0 && <span className="usage-limit"><button className="usage-upgrade-btn" onClick={handleUpgrade} disabled={upgrading}>{upgrading ? "..." : "Upgrade"}</button></span>}
               </div>
             )}
             <button className="generate-btn" onClick={handleGenerate} disabled={!canGenerate || loading || (authEnabled && !!user && !canUse("generate"))}>
-              {loading ? "Generating..." : "Generate SEO Content"}
+              {loading ? "Building..." : "\u26A1 Build My SEO System"}
             </button>
+            <p className="generate-hint">Creates article, metadata, schema, social posts, and media prompts.</p>
           </div>
 
           {error && <p className="error-msg">{error}</p>}
 
           {loading && (
-            <div className="loading-indicator">
-              <div className="spinner" />
-              Generating your SEO content...
+            <div className="builder-loading">
+              <div className="builder-loading__header">
+                <div className="kw-spinner" />
+                <h3>Building your SEO system...</h3>
+              </div>
+              <div className="builder-steps">
+                {[
+                  { icon: "\uD83D\uDD0D", label: "Analyzing competitors", delay: "0s" },
+                  { icon: "\uD83C\uDFAF", label: "Generating keywords", delay: "0.3s" },
+                  { icon: "\uD83D\uDCC4", label: "Building article structure", delay: "0.6s" },
+                  { icon: "\u270D\uFE0F", label: "Writing SEO content", delay: "0.9s" },
+                  { icon: "\uD83C\uDFF7\uFE0F", label: "Creating metadata & schema", delay: "1.2s" },
+                  { icon: "\uD83D\uDCF1", label: "Generating social posts", delay: "1.5s" },
+                ].map((step, i) => (
+                  <div key={i} className="builder-step" style={{ animationDelay: step.delay }}>
+                    <span className="builder-step__icon">{step.icon}</span>
+                    <span className="builder-step__label">{step.label}</span>
+                    <span className="builder-step__dot" />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </aside>
