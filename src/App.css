@@ -820,22 +820,58 @@
 .upgrade-gate__btn:hover { opacity: 0.9; color: #fff; }
 .upgrade-gate__blur { filter: blur(3px); pointer-events: none; user-select: none; min-height: 120px; }
 
-/* ── Insights Page ── */
+/* ── Insights Page (AI SEO Advisor) ── */
 .insights-page { padding: 24px; overflow-y: auto; max-height: calc(100vh - 56px); }
 .insights-wrap { max-width: 900px; }
-.insights-header h2 { font-size: 1.3rem; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
-.insights-header p { font-size: 0.88rem; color: #64748b; margin: 0 0 16px; }
-.insights-notice { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; }
-.insights-demo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.insights-demo-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; text-align: center; }
-.insights-demo-val { font-size: 1.4rem; font-weight: 800; color: #cbd5e1; }
-.insights-demo-label { font-size: 0.78rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-top: 4px; }
-.insights-sub { font-size: 0.85rem; color: #64748b; margin: 4px 0 12px; }
-.insights-areas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.insights-area-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
-.insights-area-name { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-.insights-area-stats { font-size: 0.78rem; color: #94a3b8; display: flex; gap: 12px; margin-bottom: 6px; }
-.insights-area-action { font-size: 0.78rem; color: #6366f1; font-weight: 600; }
+
+/* Summary card */
+.ins-summary { display: flex; gap: 16px; background: linear-gradient(135deg, #eff6ff, #f5f3ff); border: 1px solid #c7d2fe; border-radius: 16px; padding: 24px; margin-bottom: 28px; }
+.ins-summary-icon { font-size: 2rem; flex-shrink: 0; }
+.ins-summary-body { flex: 1; }
+.ins-summary-title { font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 6px; }
+.ins-summary-text { font-size: 0.9rem; color: #475569; margin: 0 0 12px; line-height: 1.6; }
+.ins-summary-actions { display: flex; gap: 8px; }
+
+/* Section titles */
+.ins-section-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 28px 0 4px; display: flex; align-items: center; gap: 6px; }
+.ins-section-desc { font-size: 0.85rem; color: #64748b; margin: 0 0 14px; }
+
+/* Growth Opportunities */
+.ins-opp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.ins-opp-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; transition: border-color 0.15s; }
+.ins-opp-card:hover { border-color: #a5b4fc; }
+.ins-opp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.ins-opp-name { font-size: 1rem; font-weight: 700; color: #0f172a; }
+.ins-opp-score { font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 10px; }
+.ins-opp-score--high { background: #dcfce7; color: #166534; }
+.ins-opp-score--med { background: #fef3c7; color: #92400e; }
+.ins-opp-score--low { background: #fee2e2; color: #991b1b; }
+.ins-opp-meta { display: flex; gap: 12px; font-size: 0.78rem; color: #64748b; margin-bottom: 6px; }
+.ins-opp-kw { font-size: 0.82rem; color: #475569; }
+.ins-opp-type { font-size: 0.75rem; color: #6366f1; font-weight: 600; margin-top: 4px; }
+
+/* Missing Keywords */
+.ins-missing-list { display: flex; flex-direction: column; gap: 8px; }
+.ins-missing-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; }
+.ins-missing-info { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; min-width: 0; }
+.ins-missing-kw { font-size: 0.88rem; font-weight: 700; color: #0f172a; }
+.ins-missing-type { font-size: 0.72rem; font-weight: 600; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; }
+
+/* Content Ideas */
+.ins-ideas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ins-idea-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+.ins-idea-type { font-size: 0.7rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+.ins-idea-title { font-size: 0.9rem; font-weight: 600; color: #0f172a; line-height: 1.4; }
+
+/* Pages to Improve */
+.ins-improve-list { display: flex; flex-direction: column; gap: 6px; }
+.ins-improve-row { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; }
+.ins-improve-issue { font-size: 0.85rem; font-weight: 600; color: #dc2626; flex-shrink: 0; }
+.ins-improve-detail { font-size: 0.82rem; color: #64748b; flex: 1; }
+
+@media (max-width: 900px) { .ins-opp-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) { .ins-summary { flex-direction: column; } .ins-opp-grid { grid-template-columns: 1fr; } .ins-ideas-grid { grid-template-columns: 1fr; } .ins-missing-row { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 480px) { .insights-page { padding: 16px; } }
 
 /* ── UX Fixes ── */
 .app--v2 .app-content-area { overflow-y: auto; max-height: calc(100vh - 56px); }

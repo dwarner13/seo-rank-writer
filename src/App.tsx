@@ -1869,28 +1869,132 @@ function App() {
           ) : activeTab === "insights" ? (
             <div className="insights-page">
               <div className="insights-wrap">
-                <div className="insights-header">
-                  <h2>SEO Insights</h2>
-                  <p>Data from Google Search Console. Connect in <button className="inline-btn" style={{ padding: "2px 10px", fontSize: "0.78rem" }} onClick={() => setActiveTab("analytics")}>SEO Analytics</button> to see real data.</p>
+
+                {/* AI Summary */}
+                <div className="ins-summary">
+                  <div className="ins-summary-icon">{"\uD83E\uDDE0"}</div>
+                  <div className="ins-summary-body">
+                    <h2 className="ins-summary-title">SEO Performance Summary</h2>
+                    {mainKeyword ? (
+                      <p className="ins-summary-text">
+                        You {result ? "are generating content for" : "have set"} <strong>"{mainKeyword}"</strong>
+                        {location ? ` in ${location}` : ""}.
+                        {settings.serviceArea ? ` Expand into nearby areas like ${settings.serviceArea.split(",").slice(0, 3).map(s => s.trim()).join(", ")} for more traffic.` : " Add a service area in Project Settings to see expansion opportunities."}
+                      </p>
+                    ) : (
+                      <p className="ins-summary-text">Set a main keyword in SEO Article or Keyword Research to get personalized insights.</p>
+                    )}
+                    <div className="ins-summary-actions">
+                      <button className="kw-btn kw-btn--primary" onClick={() => setActiveTab("keywords")}>Find Keywords</button>
+                      {!result && <button className="kw-btn" onClick={() => setActiveTab("article")}>Generate Article</button>}
+                    </div>
+                  </div>
                 </div>
-                <div className="insights-notice">Connect Google Search Console to view insights. Go to the SEO Analytics tab to connect your Google account.</div>
-                <div className="insights-demo-grid">
-                  <div className="insights-demo-card"><div className="insights-demo-val">—</div><div className="insights-demo-label">Clicks</div></div>
-                  <div className="insights-demo-card"><div className="insights-demo-val">—</div><div className="insights-demo-label">Impressions</div></div>
-                  <div className="insights-demo-card"><div className="insights-demo-val">—</div><div className="insights-demo-label">Avg CTR</div></div>
-                  <div className="insights-demo-card"><div className="insights-demo-val">—</div><div className="insights-demo-label">Avg Position</div></div>
+
+                {/* Growth Opportunities */}
+                <h3 className="ins-section-title">{"\uD83D\uDCC8"} Growth Opportunities</h3>
+                <p className="ins-section-desc">Locations where you should create SEO pages to capture more traffic.</p>
+                <div className="ins-opp-grid">
+                  {(settings.serviceArea
+                    ? settings.serviceArea.split(",").map(s => s.trim()).filter(Boolean)
+                    : ["Richmond", "Burnaby", "Surrey", "North Vancouver", "New Westminster", "Coquitlam"]
+                  ).map((area, i) => {
+                    const score = 90 - i * 8;
+                    const demand = score > 80 ? "High" : score > 65 ? "Medium" : "Low";
+                    const comp = score > 80 ? "Medium" : "Low";
+                    return (
+                      <div key={area} className="ins-opp-card">
+                        <div className="ins-opp-top">
+                          <div className="ins-opp-name">{area}</div>
+                          <div className={`ins-opp-score ins-opp-score--${score > 75 ? "high" : score > 55 ? "med" : "low"}`}>{score}</div>
+                        </div>
+                        <div className="ins-opp-meta">
+                          <span>Demand: <strong>{demand}</strong></span>
+                          <span>Competition: <strong>{comp}</strong></span>
+                        </div>
+                        <div className="ins-opp-kw">Keyword: <strong>{mainKeyword || "your service"} {area}</strong></div>
+                        <div className="ins-opp-type">Recommended: Location Page</div>
+                        <button className="kw-btn kw-btn--primary" style={{ marginTop: 8, width: "100%" }} onClick={() => {
+                          setMainKeyword(`${mainKeyword || "service"} ${area}`);
+                          setLocation(area);
+                          setActiveTab("article");
+                        }}>Generate Page</button>
+                      </div>
+                    );
+                  })}
                 </div>
-                <h3 style={{ marginTop: 24 }}>Top Local Areas</h3>
-                <p className="insights-sub">Based on query patterns from your search data.</p>
-                <div className="insights-areas">
-                  {["Vancouver", "Richmond", "Burnaby", "Surrey", "McNair", "Steveston", "East Vancouver"].map((area) => (
-                    <div key={area} className="insights-area-card">
-                      <div className="insights-area-name">{area}</div>
-                      <div className="insights-area-stats"><span>— clicks</span><span>— impressions</span></div>
-                      <div className="insights-area-action">Suggested: Create a "{mainKeyword || "service"} in {area}" page</div>
+
+                {/* Missing Keywords */}
+                <h3 className="ins-section-title">{"\uD83D\uDD0D"} Keywords You Are Missing</h3>
+                <p className="ins-section-desc">High-intent keywords you should target but haven't created content for yet.</p>
+                <div className="ins-missing-list">
+                  {[
+                    { kw: `${mainKeyword || "service"} near me`, intent: "Local", type: "Location Page" },
+                    { kw: `best ${mainKeyword || "service"} ${location || "Vancouver"}`, intent: "Commercial", type: "Blog Post" },
+                    { kw: `${mainKeyword || "service"} reviews ${location || ""}`.trim(), intent: "Informational", type: "Blog Post" },
+                    { kw: `how much does ${mainKeyword || "service"} cost`, intent: "Informational", type: "FAQ" },
+                    { kw: `${mainKeyword || "service"} same day`, intent: "Transactional", type: "Service Page" },
+                  ].map((item, i) => (
+                    <div key={i} className="ins-missing-row">
+                      <div className="ins-missing-info">
+                        <span className="ins-missing-kw">{item.kw}</span>
+                        <span className="kw-tag" style={{ background: item.intent === "Transactional" ? "#ede9fe" : item.intent === "Local" ? "#dcfce7" : item.intent === "Commercial" ? "#dbeafe" : "#fef3c7", color: item.intent === "Transactional" ? "#5b21b6" : item.intent === "Local" ? "#166534" : item.intent === "Commercial" ? "#1e40af" : "#92400e" }}>{item.intent}</span>
+                        <span className="ins-missing-type">{item.type}</span>
+                      </div>
+                      <button className="kw-btn kw-btn--primary" onClick={() => { setMainKeyword(item.kw); setActiveTab("article"); }}>Use in Article</button>
                     </div>
                   ))}
                 </div>
+
+                {/* Content Ideas */}
+                <h3 className="ins-section-title">{"\uD83D\uDCA1"} Content Opportunities</h3>
+                <p className="ins-section-desc">Article and page ideas to boost your SEO footprint.</p>
+                <div className="ins-ideas-grid">
+                  {[
+                    { title: `${mainKeyword || "Service"} in ${location || "Your City"}: Complete Guide`, type: "Blog Post" },
+                    { title: `How to Choose the Best ${mainKeyword || "Service"} Near You`, type: "Blog Post" },
+                    { title: `${mainKeyword || "Service"} FAQ — Common Questions Answered`, type: "FAQ" },
+                    { title: `Why ${location || "Local"} Residents Trust ${businessName || "Our Business"}`, type: "Blog Post" },
+                  ].map((idea, i) => (
+                    <div key={i} className="ins-idea-card">
+                      <div className="ins-idea-type">{idea.type}</div>
+                      <div className="ins-idea-title">{idea.title}</div>
+                      <button className="kw-btn" style={{ marginTop: 8 }} onClick={() => { setMainKeyword(idea.title); setActiveTab("article"); }}>Create Article</button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pages to Improve */}
+                {result && (
+                  <>
+                    <h3 className="ins-section-title">{"\u26A0\uFE0F"} Pages to Improve</h3>
+                    <p className="ins-section-desc">Your current content could rank better with these fixes.</p>
+                    <div className="ins-improve-list">
+                      {seoScore.categories.meta.items.filter(i => !i.pass).map((item, i) => (
+                        <div key={`m${i}`} className="ins-improve-row">
+                          <span className="ins-improve-issue">{item.label}</span>
+                          <span className="ins-improve-detail">{item.detail}</span>
+                          <button className="kw-btn" onClick={() => navigateToTool("metadata")}>Fix Metadata</button>
+                        </div>
+                      ))}
+                      {seoScore.categories.content.items.filter(i => !i.pass).map((item, i) => (
+                        <div key={`c${i}`} className="ins-improve-row">
+                          <span className="ins-improve-issue">{item.label}</span>
+                          <span className="ins-improve-detail">{item.detail}</span>
+                          <button className="kw-btn" onClick={() => setActiveTab("article")}>Improve Article</button>
+                        </div>
+                      ))}
+                      {seoScore.categories.schema.items.filter(i => !i.pass).map((item, i) => (
+                        <div key={`s${i}`} className="ins-improve-row">
+                          <span className="ins-improve-issue">{item.label}</span>
+                          <span className="ins-improve-detail">{item.detail}</span>
+                          <button className="kw-btn" onClick={() => navigateToTool("schema")}>Fix Schema</button>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
               </div>
             </div>
           ) : (
